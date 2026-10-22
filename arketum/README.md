@@ -1,4 +1,4 @@
-# Arketum 1.0.0 — Claude Code plugin
+# Arketum 1.0.1 — Claude Code plugin
 
 Arketum guides an agent through a verified lifecycle for building software: each piece of work is a unit with a lane (new project, feature, small fix, deployment…), the steps that need your decision stop at a gate you answer, every change is tied to a requirement, and nothing closes without its evidence. Arketum does not write your code and does not make your decisions: it tells the agent what comes next, checks what the agent hands in, and records what you decided.
 
@@ -25,14 +25,14 @@ From the marketplace:
 /plugin install arketum@rlabs
 ```
 
-From the zip: unzip `arketum-plugin-1.0.0.zip` somewhere you will keep it (the plugin is installed from there), then:
+From the zip: unzip `arketum-plugin-1.0.1.zip` somewhere you will keep it (the plugin is installed from there), then:
 
 ```
 /plugin marketplace add <path>/arketum-plugin
 /plugin install arketum@rlabs
 ```
 
-Restart the Claude Code session afterwards. To try it without installing: `claude --plugin-dir <path>/arketum-plugin/arketum`. Where a plugin is uploaded as a single file, use `arketum-1.0.0.plugin.zip`: the same plugin, with its manifest at the root.
+Restart the Claude Code session afterwards. To try it without installing: `claude --plugin-dir <path>/arketum-plugin/arketum`. Where a plugin is uploaded as a single file, use `arketum-1.0.1.plugin.zip`: the same plugin, with its manifest at the root.
 
 If you had registered Arketum by hand as an MCP server, remove it so there are not two: `claude mcp remove arketum -s user`.
 
