@@ -1,0 +1,88 @@
+# Stack: TypeScript, con Node y vitest.
+#
+# Cambios:
+# - 1.1.0: `tsconfig.json`, `package-lock.json` y `README.md` con el módulo;
+#   los estáticos de la interfaz, también en subcarpetas; las carpetas generadas.
+# - 1.2.0: las fijaciones de `juego-terminal` y de `aplicacion-por-capas` (los suelos por terminal y la
+#   ayuda e2e para vitest, con un puente de terminal en Python), sus comandos y `arrancar.sh` como
+#   arranque, el contrato de arranque de las formas; lo que genera Python.
+# - 1.3.0: la ubicación `configura-pruebas` (`vitest.config.*`,
+#   `vitest.workspace.*`, `vite.config.*`): lo que el cierre enseña cuando
+#   cambia, porque puede saltarse pruebas sin tocarlas. Antes lo sabía Arketum
+#   por el nombre; ahora lo dice el stack. TRANSICIÓN: la huella del stack y
+#   la del efectivo cambian; los descensos certificados con la anterior dan
+#   `stale_policy` hasta recertificarlos. Desde el catálogo oficial, con la
+#   versión nueva, la política fijada de una unidad viva no lo cuenta como cambio
+#   de política (lo vigila `stale_policy`); desde un catálogo de otra confianza,
+#   sí sale como cambio de la huella del stack. Un stack propio, o una copia de
+#   la 1.2.0, sin `configura-pruebas` deja de enseñar al cerrar los cambios a lo
+#   que configura las pruebas: `status` de una unidad lo avisa una vez.
+#   Y `noEjecutan`: los argumentos con que vitest no ejecuta ninguna prueba,
+#   que antes sabía Arketum.
+name: typescript
+version: 1.3.0
+description: >-
+  TypeScript sobre Node, con vitest: el código en `src/<capa>/`, con varios ficheros por capa, las pruebas `<nombre>.test.ts` junto a lo que prueban y las de extremo a extremo en `src/e2e/`, `src/main.ts` y `arrancar.sh` como arranque y `package.json` y `tsconfig.json` en la raíz del artefacto.
+
+# Rutas relativas a la raíz del artefacto.
+ubicaciones:
+  modulo: { pattern: ["package.json", "tsconfig.json", "package-lock.json", "README.md"] }
+  dominio: { pattern: "src/dominio/<nombre>.ts", excluding: ["src/dominio/<nombre>.test.ts"] }
+  almacen: { pattern: "src/almacen/<nombre>.ts", excluding: ["src/almacen/<nombre>.test.ts"] }
+  servicio: { pattern: "src/servicios/<nombre>.ts", excluding: ["src/servicios/<nombre>.test.ts"] }
+  interfaz:
+    pattern: ["src/interfaz/<nombre>.ts", "src/interfaz/estaticos/<nombre>.<ext>", "src/interfaz/estaticos/<carpeta>/<nombre>.<ext>"]
+    excluding: ["src/interfaz/<nombre>.test.ts"]
+  api: { pattern: "src/api/<nombre>.ts", excluding: ["src/api/<nombre>.test.ts"] }
+  cliente: { pattern: "src/clientes/<nombre>.ts", excluding: ["src/clientes/<nombre>.test.ts"] }
+  arranque: { pattern: ["src/main.ts", "arrancar.sh"] }
+  prueba: { pattern: "src/<carpeta>/<nombre>.test.ts" }
+  # Lo que configura cómo se ejecutan las pruebas (no es un tipo de pieza): el cierre lo enseña cuando cambia.
+  configura-pruebas: { pattern: ["vitest.config.<ext>", "vitest.workspace.<ext>", "vite.config.<ext>"] }
+
+muestras:
+  modulo: [package.json, tsconfig.json, README.md]
+  dominio: [src/dominio/pedido.ts, src/dominio/producto.ts]
+  almacen: [src/almacen/sqlite.ts]
+  servicio: [src/servicios/pedidos.ts, src/servicios/carrito.ts]
+  interfaz: [src/interfaz/web.ts, src/interfaz/estaticos/estilo.css, src/interfaz/estaticos/css/base.css]
+  api: [src/api/rutas.ts]
+  cliente: [src/clientes/catalogo.ts]
+  arranque: [src/main.ts, arrancar.sh]
+  prueba: [src/servicios/pedidos.test.ts, src/dominio/pedido.test.ts, src/e2e/compra.test.ts]
+  configura-pruebas: [vitest.config.ts, vitest.config.mjs, vite.config.ts]
+
+# Lo que generan npm, tsc y vitest (y Python, al correr el suelo): no se reclama ni cuenta como cambio.
+generados: [node_modules/, dist/, coverage/, __pycache__/]
+
+oficio:
+  - 'Tipado estricto (`strict: true`); nada de `any` sin un comentario que diga por qué.'
+  - Un fichero por concepto dentro de la carpeta de su capa; no se junta todo en uno.
+  - El dominio no importa nada de Node (`fs`, `http`, `process`); el instante entra como parámetro.
+  - Un fallo al leer lo guardado no se traga - se avisa y se para; nunca se sigue con vacío ni se sobrescribe.
+  - Los puertos y las URL salen del entorno, nunca escritos a mano.
+  - '`arrancar.sh` lanza la aplicación (`exec node dist/main.js "$@"`, o con el cargador de TypeScript del proyecto): es lo que lanzan el suelo y las pruebas e2e.'
+  - Las pruebas e2e (`src/e2e/`) arrancan la aplicación con `arrancar` de la fijación e2e (`arketum/fijaciones/e2e/app.mjs`) o, un programa de terminal, con `abrirTerminal`, y la usan por la interfaz real (HTTP en `PUERTO`, su entrada y su salida o la terminal), como una persona; nunca importan su código. `abrirTerminal` también necesita `pyte`. El suelo necesita `python3` con `pyte` (`python3 -m pip install -r arketum/fijaciones/suelo/requirements.txt`), que es de las pruebas, no del producto.
+
+# Fijas del catálogo: se copian tal cual en `arketum/fijaciones/<nombre>/` del
+# artefacto y no se editan (el cierre compara su checksum).
+fijaciones:
+  - { de: stacks/typescript/suelo-aplicacion-por-capas, nombre: suelo, para: suelo, formas: [aplicacion-por-capas] }
+  - { de: stacks/typescript/suelo-juego-terminal, nombre: suelo, para: suelo, formas: [juego-terminal] }
+  - { de: stacks/typescript/e2e-node, nombre: e2e, para: e2e, formas: [juego-terminal, aplicacion-por-capas] }
+
+# Los argumentos con los que su ejecutor de pruebas (vitest) no ejecuta ninguna, o da
+# por buena una suite sin pruebas: una ejecución de la suite e2e con uno de ellos no cuenta como e2e.
+noEjecutan: [--passWithNoTests, --pass-with-no-tests, --help, -h, --version, -v, --list, --listTests, --list-tests, --showConfig]
+
+comandos:
+  pruebas: npx vitest run
+  suelo: python3 -B arketum/fijaciones/suelo/suelo.py .
+  e2e: npx vitest run --config arketum/fijaciones/e2e/vitest.config.mjs
+
+
+selfReview:
+  criteria:
+    - check: El código compila sin errores con `tsc --noEmit`
+      how: Corre `npx tsc --noEmit` y lee la salida.
+      evidence: medida

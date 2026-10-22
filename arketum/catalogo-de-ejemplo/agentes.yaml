@@ -1,0 +1,11 @@
+# Los nombres de los clientes que Arketum lee o escribe por función (ag-t01): el código de src/ no los escribe.
+# En varios catálogos, cada lista es la unión de las suyas, en orden.
+#
+# - instrucciones: los ficheros de instrucciones que se generan para los agentes, en la raíz del proyecto, con el
+#   mismo texto (`action: instructions`); el estado avisa si el que hay ya no es el que se generaría.
+# - configuracion: las carpetas de configuración de editores y agentes que la herramienta crea solo por abrir la
+#   carpeta: en la raíz, no cuentan para clasificar el arranque y se proponen como andamiaje.
+# - andamiaje: el andamiaje mínimo que propone el arranque, además de los ficheros de instrucciones.
+instrucciones: [AGENTS.md, CLAUDE.md]
+configuracion: [.claude/, .vscode/, .idea/, .cursor/]
+andamiaje: [.git/, node_modules/, dist/]

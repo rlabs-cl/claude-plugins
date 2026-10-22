@@ -1,0 +1,141 @@
+# Radio de alcance de un cambio.
+#
+# Declara la forma de una afirmación que casi nadie escribe y de la que depende
+# todo lo demás: QUÉ PUEDE TOCAR un cambio. No qué tocó — qué puede tocar.
+#
+# Sirve para dos procesos con la misma forma y distinta fuente: en una migración
+# la fuente es el grafo de dependencias; en un requerimiento normativo, la norma.
+#
+# Regla que este arquetipo existe para hacer cumplir: «acotado» no lo declara
+# quien hizo el cambio, y cuando no se puede acotar el radio, el cambio es
+# MASIVO por definición. La frontera se declara con evidencia, igual que lo
+# alcanzado — porque la frontera es la afirmación arriesgada, no la lista.
+name: radio-de-alcance
+version: 1.1.0
+description: >-
+  Análisis de lo que PUEDE tocar un cambio antes de hacerlo: fuentes, alcanzados, fronteras con evidencia y certificaciones. Es un artefacto de trabajo del carril de funcionalidad y de las migraciones. Elígelo para acotar un cambio; para explicar un fallo ya ocurrido corresponde un RCA.
+tags: [proceso, impacto, analisis]
+
+kinds:
+  - name: objetivo
+    describes: "pieza de la solicitud (L0): qué cambio se acota y quién lo declara"
+  - name: fuente
+    describes: de dónde sale el alcance — grafo de dependencias, norma, contrato
+  - name: alcanzado
+    describes: algo que el cambio puede tocar
+  - name: frontera
+    describes: algo que se declara FUERA del radio, con la razón por la que queda fuera
+  - name: evidencia
+    describes: lo que sostiene que algo está dentro o fuera
+  - name: certificacion
+    describes: certificación vigente que cae dentro del radio y hay que reverificar
+  - name: dependencia
+    describes: arista del cableado (L3) entre dos piezas declaradas
+  - name: documento
+    describes: fichero de notas o de política
+
+extractors:
+  - mechanism: path
+    kind: fuente
+    pattern: "fuentes/<nombre>.md"
+  - mechanism: path
+    kind: alcanzado
+    pattern: "alcanzados/<nombre>.md"
+  - mechanism: path
+    kind: frontera
+    pattern: "fronteras/<nombre>.md"
+  - mechanism: path
+    kind: evidencia
+    pattern: "evidencia/<nombre>.md"
+  - mechanism: path
+    kind: certificacion
+    pattern: "certificaciones/<nombre>.md"
+  - mechanism: path
+    kind: documento
+    pattern: "<nombre>.md"
+
+# Lo alcanzado y la frontera pesan igual. Una frontera sin evidencia es la
+# forma en que un radio se declara acotado sin serlo.
+coRequirements:
+  - when: alcanzado
+    requires: [evidencia]
+    scope: artifact
+  - when: frontera
+    requires: [evidencia]
+    scope: artifact
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: CAMBIO
+    instruction: >
+      Declara qué cambió, quién lo hizo, y QUIÉN DECLARA ESTE RADIO — que no
+      puede ser quien hizo el cambio. Declara también contra qué se acota: un
+      grafo de dependencias, una norma, un contrato.
+  - id: L1
+    requiredRoles: [fuentes, frescura]
+    title: FUENTES
+    instruction: >
+      Declara de dónde sale el alcance y CUÁNDO se midió esa fuente. Una fuente
+      con deriva conocida —un índice que se refresca por hora, un grafo cuya cola
+      de fallos crece en silencio— produce un radio corto, y un radio corto
+      produce una recertificación corta que se firma igual. Si no puedes
+      establecer la frescura, dilo aquí: es lo que convierte el radio en masivo.
+    fanout:
+      min: 1
+      max: 10
+  - id: L2
+    requiredRoles: [directos, indirectos, fronteras]
+    title: ALCANCE
+    instruction: >
+      Declara qué puede tocar el cambio: lo que lo usa directamente, lo que llega
+      por transitividad, y lo que queda FUERA. Las tres. Un radio sin fronteras
+      declaradas no está acotado: está sin mirar.
+    fanout:
+      min: 3
+      max: 80
+  - id: L3
+    requiredRoles: []
+    title: CERTIFICACIONES
+    instruction: >
+      Qué certificaciones vigentes caen dentro del radio. Recuerda que una
+      certificación muere por dos causas y solo una deja rastro: cambió el
+      artefacto, o cambió el criterio. La segunda no la dispara ningún commit.
+    fanout:
+      min: 0
+      max: 60
+  - id: L4
+    requiredRoles: []
+    title: RADIO
+    instruction: >
+      Escribe el veredicto: ACOTADO o MASIVO, y qué hay que reverificar. Si es
+      acotado, declara qué se da por bueno sin volver a probar. Si no pudiste
+      acotar, es masivo — y masivo significa todo lo que se intentó, sin muestreo.
+      Declara también el fichero del radio (tipo `documento`, con su `location`):
+      es lo que la fidelidad compara en este último nivel.
+    fanout:
+      min: 1
+      max: 80
+
+selfReview:
+  criteria:
+    - check: Quien declara el radio no es quien hizo el cambio
+      evidence: juicio
+    - check: La fuente del alcance tiene fecha de medición y esa fecha es fresca
+      how: >
+        Nombra la fuente y cuándo se consultó. Si es un índice, comprueba su cola
+        de fallos y su última corrida. Un índice sucio no informa el radio.
+      evidence: medida
+    - check: Cada elemento alcanzado tiene evidencia de por qué está dentro
+      how: Recorre la lista de L2 y contrasta cada uno contra la fuente declarada.
+      evidence: medida
+    - check: Cada frontera tiene evidencia de por qué está fuera
+      how: >
+        Recorre las fronteras y comprueba, contra la misma fuente, que no hay
+        camino desde el cambio. Una frontera sostenida solo en intuición no vale.
+      evidence: medida
+    - check: Si el radio no se pudo acotar, el veredicto dice MASIVO y no acotado
+      evidence: juicio
+  groundingCheck: true
+  groundingScope: alguna fuente, evidencia o certificación
+  assumptionsMustDeclare: true

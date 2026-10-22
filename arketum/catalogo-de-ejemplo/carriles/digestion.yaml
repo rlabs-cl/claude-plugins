@@ -1,0 +1,14 @@
+# Digerir un código que ya existe: proponer su estructura base (los artefactos
+# con su stack y su componente o su arquetipo, la forma con su variante y sus
+# escalones, el andamiaje y la cobertura), que la persona confirma en el gate.
+# Al aprobarse, Arketum la escribe en `proyecto.yaml` sin fijar tocados ni
+# cambiar código; no infiere requisitos funcionales. En un proyecto que ya tiene
+# artefactos, legaliza lo que está fuera de lo declarado (y retira artefactos sin
+# raíz, sin unidad viva y sin requisitos).
+name: digestion
+version: 1.0.0
+when: Un código que ya existe sin la estructura base de Arketum, o lo que está fuera de lo declarado en un proyecto que ya la tiene.
+milestones: []
+steps:
+  - { id: digestion, kind: artifact, archetype: { name: digestion }, gate: true, digestion: true }
+  - { id: arquetipo, kind: artifact, archetype: { name: arquetipo-autor }, optional: true, gate: true }

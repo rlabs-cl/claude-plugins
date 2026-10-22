@@ -1,0 +1,34 @@
+# Una funcionalidad en un sistema que existe: se pide (PRD), se acota (radio de
+# alcance) y se construye en los artefactos tocados, con aceptación y sin
+# regresiones.
+#
+# Cambios:
+# - 1.2.0: la aceptación exige además las salidas de los tocados (`salidas: true`).
+# - 1.3.0: el hito `despliegue <entorno>` cuenta (`humo: true`): exige la prueba de humo y que el entorno exista.
+# - 1.4.0: el hito `despliegue <entorno>` lo cumple la confirmación de la persona por el canal interactivo («¿se desplegó en <entorno> y corrió?», sí o no): la marca `humo` pasa a llamarse `confirmacion` y la prueba de humo deja de exigirse.
+# - 1.5.0: el radio de alcance y la arquitectura opcional son gates del proceso (`gate: proceso`): una delegación de la persona los aprueba; lo que se construye (el PRD) y el hito siguen siendo de ella.
+name: funcionalidad
+version: 1.5.0
+when: Añadir o cambiar una funcionalidad de un sistema que ya existe.
+milestones: [despliegue, entrega, ejecucion]
+steps:
+  - { id: prd, kind: artifact, archetype: { name: prd }, gate: true, levantamiento: true, feeds: [sistema] }
+  - { id: radio-de-alcance, kind: artifact, archetype: { name: radio-de-alcance }, gate: proceso, feeds: [sistema] }
+  - { id: arquitectura, kind: artifact, archetype: { name: arquitectura-de-sistema }, optional: true, gate: proceso }
+  - { id: arquetipo, kind: artifact, archetype: { name: arquetipo-autor }, optional: true, gate: true }
+  - { id: sistema, kind: system, fedBy: [prd, radio-de-alcance] }
+  - id: aceptacion
+    # Además de lo suyo, las salidas de cada tocado cuyo arquetipo efectivo las pide:
+    # el suelo y la suite e2e entera, con sus comandos compuestos (`salidas/<artefacto>/…`).
+    salidas: true
+    kind: evidence
+    requires:
+      - { id: aceptacion, describes: la funcionalidad hace lo que pide el PRD, classes: [execution], expect: success }
+      - { id: no-regresion, describes: lo que ya funcionaba sigue funcionando, classes: [execution], expect: success }
+  - id: hito
+    kind: milestone
+    optional: true
+    gate: true
+    confirmacion: true
+    requires:
+      - { id: cumplido, describes: la persona confirma que el hito se cumplió, classes: [statement] }

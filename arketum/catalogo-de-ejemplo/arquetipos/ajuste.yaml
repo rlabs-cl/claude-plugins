@@ -1,0 +1,54 @@
+# Un ajuste: un cambio chico sobre piezas que ya existen (la 35).
+#
+# Artefacto de trabajo del carril `ajuste`: vive en la carpeta de la unidad y
+# alimenta al paso de sistema. Su primer nivel es el radio corto (qué pieza toca
+# y qué más podría tocar); el último, los requisitos, con su cita literal del
+# pedido de la persona.
+name: ajuste
+version: 1.0.0
+description: >-
+  Un cambio chico sobre piezas que ya existen: qué pieza toca, qué más podría tocar y cómo se notaría, y los requisitos con su cita del pedido de la persona. Es el artefacto de trabajo del carril `ajuste`; para algo nuevo o grande corresponde un PRD.
+tags: [proceso, requisitos, ajuste]
+
+kinds:
+  - name: toca
+    describes: "una pieza de un tocado que el cambio toca: `artefacto` (uno de los tocados) y `pieza` (el id de un elemento del nivel de piezas de su línea base)"
+  - name: riesgo
+    describes: lo que más podría tocar el cambio y cómo se notaría en la comprobación; si no hay, uno solo con id `ninguno` y su `porque`
+  - name: requisito
+    describes: algo concreto que el sistema tiene que hacer o cumplir, con su cita del pedido
+  - name: documento
+    describes: el fichero del ajuste, en la carpeta de trabajo del paso
+
+extractors:
+  - mechanism: path
+    kind: documento
+    pattern: "<nombre>.md"
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: RADIO
+    instruction: >
+      Declara qué pieza toca el cambio, una `toca` por pieza, con `artefacto` (uno
+      de los tocados; cada tocado, al menos una) y `pieza` (el id de un elemento
+      del nivel de piezas de su último descenso certificado, el que se va a
+      heredar). Y pregúntate qué más toca esto: un `riesgo` por cada cosa que
+      podría romperse, con cómo se notaría en la comprobación (por ejemplo, que
+      las corridas guardadas se reproduzcan igual). Si de verdad no hay ninguno,
+      un solo `riesgo` con id `ninguno` y su `porque`.
+  - id: L1
+    requiredRoles: []
+    title: REQUISITOS
+    instruction: >
+      Declara los requisitos del ajuste y el fichero del ajuste (tipo
+      `documento`, con su `location`). Cada requisito lleva los atributos `tipo`
+      (`funcional` o `tecnico`), `requisito` (su id corto; con el de uno que ya
+      existe es una versión nueva), `titulo`, `sale_de` (la frase literal del
+      pedido de la persona, o de su respuesta a una pregunta), `porque` en un
+      `tecnico`, `aceptacion` y, si la unidad toca varios artefactos,
+      `artefacto`. Pocos: si hacen falta más de los que admite el carril, no es
+      un ajuste.
+    fanout:
+      min: 1
+      max: 10

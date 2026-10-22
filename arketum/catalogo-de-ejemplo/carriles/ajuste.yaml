@@ -1,0 +1,14 @@
+# Un ajuste: un cambio chico sobre piezas que ya existen (la 35). Se piensa por
+# cambio (la cita literal del pedido y un radio corto) y se prueba en grupo: cierra
+# sin las condiciones 9 y 10, que juzga una `comprobacion` de los ajustes sin
+# comprobar. Su tamaño lo mide Arketum contra la línea base: si se excede, se
+# descarta y se continúa en `funcionalidad` (`continua`), con su foto.
+name: ajuste
+version: 1.0.0
+when: Un cambio chico sobre piezas que ya existen. Si resulta más grande, Arketum lo dice y sube a `funcionalidad`.
+comprobacion: agrupada
+tope_sin_comprobar: 5
+max_cambios_sin_comprobar: 16
+steps:
+  - { id: ajuste, kind: artifact, archetype: { name: ajuste }, gate: true, levantamiento: breve, max_requisitos: 3, feeds: [sistema] }
+  - { id: sistema, kind: system, fedBy: [ajuste], max_cambios: 8, piezas: L1 }

@@ -1,0 +1,42 @@
+# Inventario funcional de un sistema existente.
+#
+# Antes de migrar, qué hace hoy el sistema: las funciones que no se pueden
+# perder. Es la línea de partida del plan de migración.
+name: inventario-funcional
+version: 1.1.0
+description: >-
+  Qué hace hoy un sistema existente, función a función, antes de migrarlo: lo que no se puede perder. Es el primer artefacto de trabajo del carril de migración. Elígelo para describir un sistema que ya existe; para pedir algo nuevo corresponde un PRD.
+tags: [proceso, migracion, inventario]
+
+kinds:
+  - name: objetivo
+    describes: "pieza de la solicitud (L0): qué sistema se inventaría y para qué migración"
+  - name: funcion
+    describes: algo que el sistema hace hoy y que alguien usa
+  - name: documento
+    describes: el fichero del inventario, en la carpeta de trabajo del paso
+
+extractors:
+  - mechanism: path
+    kind: documento
+    pattern: "<nombre>.md"
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: SISTEMA
+    instruction: >
+      Declara qué sistema se inventaría, dónde vive y hacia dónde se migra.
+  - id: L1
+    requiredRoles: []
+    title: FUNCIONES
+    instruction: >
+      Declara las funciones del sistema actual, cada una con quién la usa, y el
+      fichero del inventario (tipo `documento`, con su `location`). Una función
+      que nadie usa se declara igual: decidir si se pierde es del plan. Una
+      función puede sembrar el índice de requisitos del sistema con los mismos
+      atributos que un requisito del PRD (`tipo`, `requisito`, `titulo`,
+      `sale_de` y los demás): aprobar el inventario los acuerda.
+    fanout:
+      min: 1
+      max: 80

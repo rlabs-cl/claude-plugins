@@ -1,0 +1,48 @@
+TEXTO DE PARTIDA, PENDIENTE DE REVISIÓN LEGAL. No es el texto definitivo de la
+licencia de Arketum: lo revisa quien tiene los derechos antes de cualquier
+distribución pública.
+
+--------------------------------------------------------------------------------
+
+LICENCIA DE USO DE ARKETUM
+
+Copyright (c) 2026 rlabs-cl. Todos los derechos reservados.
+
+Arketum (el «Software») es software propietario de rlabs-cl. Esta licencia no
+es una licencia de código abierto.
+
+1. Concesión. rlabs-cl concede a quien recibe el Software, de forma no
+   exclusiva, intransferible y revocable, el derecho a instalarlo y usarlo, tal
+   como se distribuye, para su propio trabajo.
+
+2. Lo que no se concede. Salvo autorización previa y por escrito de rlabs-cl,
+   no se concede el derecho a:
+   a) copiar el Software, salvo lo necesario para instalarlo y usarlo;
+   b) modificarlo, adaptarlo, traducirlo o crear obras derivadas de él;
+   c) redistribuirlo, publicarlo, venderlo, alquilarlo, prestarlo o ponerlo a
+      disposición de terceros, con o sin modificaciones;
+   d) descompilarlo, desensamblarlo o aplicarle ingeniería inversa, salvo en la
+      medida en que la ley aplicable lo permita expresamente pese a esta
+      limitación;
+   e) sublicenciarlo, ni ceder los derechos de esta licencia.
+
+3. Componentes de terceros. El Software incluye componentes de terceros que se
+   rigen por sus propias licencias, recogidas en el fichero
+   THIRD-PARTY-NOTICES que lo acompaña. Esta licencia no limita los derechos
+   que esas licencias conceden sobre esos componentes.
+
+4. Avisos. No se pueden quitar ni alterar los avisos de derechos de autor, de
+   esta licencia ni de THIRD-PARTY-NOTICES.
+
+5. Sin garantía. EL SOFTWARE SE ENTREGA «TAL CUAL», SIN GARANTÍA DE NINGÚN
+   TIPO, EXPRESA O IMPLÍCITA, INCLUIDAS, SIN LIMITARSE A ELLAS, LAS DE
+   COMERCIABILIDAD, IDONEIDAD PARA UN FIN DETERMINADO Y NO INFRACCIÓN.
+
+6. Limitación de responsabilidad. EN NINGÚN CASO rlabs-cl SERÁ RESPONSABLE DE
+   RECLAMACIONES, DAÑOS U OTRAS RESPONSABILIDADES, YA SEA POR CONTRATO, ACTO
+   ILÍCITO O DE OTRO MODO, QUE SURJAN DEL SOFTWARE, DE SU USO O DE OTRAS
+   OPERACIONES CON ÉL.
+
+7. Terminación. Esta licencia termina sin aviso si se incumple cualquiera de
+   sus términos. Al terminar, hay que dejar de usar el Software y borrar las
+   copias que se tengan.

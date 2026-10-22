@@ -1,0 +1,36 @@
+# Desplegar es parte del trabajo guiado. Antes de preparar el despliegue hay un
+# levantamiento completo de la infraestructura (que puede quedar pendiente: el
+# cuestionario lo genera Arketum y se escribe fuera del repositorio); el modo se
+# elige después de entender; el despliegue es un artefacto del sistema
+# (`despliegue-compose` en este catálogo), y el hito lo cumple la persona al
+# confirmar que se desplegó y corrió.
+#
+# Cambios:
+# - 1.1.0: el hito `despliegue <entorno>` lo cumple la confirmación de la persona por el canal interactivo («¿se desplegó en <entorno> y corrió?», sí o no): la marca `humo` pasa a llamarse `confirmacion` y la prueba de humo deja de exigirse.
+name: despliegue
+version: 1.1.0
+when: Desplegar un sistema que existe por primera vez, en un entorno nuevo, o cambiar lo acordado de un entorno.
+milestones: [despliegue]
+steps:
+  # El levantamiento de infraestructura: los papeles de la fase 1, con la instrucción del nivel por delante en lo técnico.
+  - { id: infraestructura, kind: artifact, archetype: { name: levantamiento-de-infraestructura }, gate: true, pendientes: true, feeds: [sistema, preparado] }
+  # Añade el artefacto de despliegue al proyecto si todavía no existe.
+  - { id: arquitectura, kind: artifact, archetype: { name: arquitectura-de-sistema }, optional: true, gate: true }
+  # Publica el arquetipo de un modo que no está en los catálogos (pipeline, script…).
+  - { id: arquetipo, kind: artifact, archetype: { name: arquetipo-autor }, optional: true, gate: true }
+  - { id: sistema, kind: system, fedBy: [infraestructura] }
+  - id: preparado
+    kind: evidence
+    fedBy: [infraestructura]
+    # Además, la verificación de cada referencia verificable del levantamiento (`infraestructura/<id>`, `on: entorno`).
+    requires:
+      - { id: validacion, describes: "la validación en seco de la definición del despliegue (en el compose, `docker compose -f despliegue/compose.yaml config --quiet`)", classes: [execution], expect: success, on: change }
+  - id: hito
+    kind: milestone
+    optional: true
+    gate: true
+    # `despliegue <entorno>`: exige la confirmación de la persona por el canal interactivo
+    # (`despliegue/<entorno>/confirmacion`: «¿se desplegó en <entorno> y corrió?», sí o no); una ejecución
+    # o un reporte del CI son respaldo opcional. No se completa mientras una decisión de antes de
+    # desplegar ese entorno siga por decidir.
+    confirmacion: true

@@ -1,0 +1,154 @@
+# Servicio que depende de otro sistema. Go.
+#
+# Declara la forma de un servicio con fronteras externas —una pasarela, un
+# sincronizador, un webhook con reintentos—, no la de ninguno. No sabe con qué
+# se integra.
+#
+# La política de este arquetipo es una sola idea: TODA FRONTERA SE DECLARA Y SE
+# PUEDE SUSTITUIR. Lo que no se puede sustituir no se puede probar, y lo que no
+# se puede probar es donde caen los sistemas integrados.
+#
+# Cambios:
+# - 1.1.0: los extractores de código excluyen `<nombre>_test.go` (una prueba
+#   junto a lo que prueba solo la reclama `prueba`); tipos nuevos `modulo`
+#   (go.mod y go.sum) y `arranque` (cmd/<binario>/main.go). La huella cambia:
+#   un proyecto que ya lo usa ve `stale_policy` y recertifica sus artefactos.
+#   `templates/` y `static/` de una web siguen sin tipo.
+name: servicio-con-integracion
+version: 1.1.0
+description: >-
+  Servicio que depende de otros sistemas (pasarela, sincronizador, webhook con reintentos), en Go. Toda frontera externa se declara como puerto y tiene un doble sustituible para probarla. Elígelo cuando lo central del artefacto sea integrarse; para una web con persistencia propia hay otros.
+tags: [codigo, servicio, integracion, go]
+
+kinds:
+  - name: objetivo
+    describes: pieza de la solicitud (L0), sin ubicación en el árbol
+  - name: frontera
+    describes: interfaz que describe un sistema ajeno tal como este lo necesita
+  - name: adaptador
+    describes: implementación de una frontera contra el sistema real
+  - name: doble
+    describes: implementación de una frontera para probar sin el sistema real
+  - name: servicio
+    describes: lógica propia, que no habla con nadie de fuera
+  - name: dependencia
+    describes: arista del cableado (L3) entre dos piezas declaradas
+  - name: prueba
+    describes: fichero de prueba
+  - name: modulo
+    describes: la definición del módulo de Go y sus sumas (go.mod, go.sum)
+  - name: arranque
+    describes: el punto de entrada de un binario (cmd/<binario>/main.go)
+  - name: documento
+    describes: fichero de documentación o de política
+
+# Una prueba vive junto a lo que prueba (`x_test.go`): cada extractor de código
+# la excluye, para que solo la reclame `prueba`.
+extractors:
+  - mechanism: path
+    kind: frontera
+    pattern: "internal/fronteras/<nombre>.go"
+    excluding: ["internal/fronteras/<nombre>_test.go"]
+  - mechanism: path
+    kind: adaptador
+    pattern: "internal/adaptadores/<nombre>.go"
+    excluding: ["internal/adaptadores/<nombre>_test.go"]
+  - mechanism: path
+    kind: doble
+    pattern: "internal/dobles/<nombre>.go"
+    excluding: ["internal/dobles/<nombre>_test.go"]
+  - mechanism: path
+    kind: servicio
+    pattern: "internal/servicios/<nombre>.go"
+    excluding: ["internal/servicios/<nombre>_test.go"]
+  - mechanism: path
+    kind: prueba
+    pattern: "internal/<paquete>/<nombre>_test.go"
+  # go.mod y go.sum: un extractor por tipo, y el marcador casa con media palabra.
+  - mechanism: path
+    kind: modulo
+    pattern: "go.<fichero>"
+  - mechanism: path
+    kind: arranque
+    pattern: "cmd/<binario>/main.go"
+
+# Un adaptador sin doble es una frontera que solo se puede ejercitar contra el
+# sistema real: la prueba se vuelve lenta, frágil y acaba desactivada.
+coRequirements:
+  - when: adaptador
+    requires: [doble]
+    scope: artifact
+  - when: servicio
+    requires: [prueba]
+    scope: artifact
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: SOLICITUD
+    instruction: >
+      Declara qué tiene que conseguir el servicio y con qué sistemas ajenos
+      necesita hablar para conseguirlo. Nombra los sistemas; no cómo se les
+      llama por dentro.
+  - id: L1
+    requiredRoles: [fronteras, adaptadores, servicios]
+    title: PARTES
+    instruction: >
+      Propón las partes, separando lo que es tuyo de lo que es de otro. Una
+      pieza que mezcle lógica propia con una llamada a un sistema ajeno no
+      podrá probarse sin ese sistema, y este nivel existe para impedirlo.
+    fanout:
+      min: 3
+      max: 14
+  - id: L2
+    requiredRoles: []
+    title: CONTRATOS
+    instruction: >
+      Declara cada frontera tal como TU servicio la necesita, no como la
+      documenta el proveedor. Y declara qué pasa cuando el sistema ajeno falla,
+      tarda o responde algo que no esperabas: eso también es el contrato.
+    fanout:
+      min: 1
+      max: 30
+  - id: L3
+    requiredRoles: []
+    title: CABLEADO
+    instruction: >
+      Declara qué depende de qué, y en particular qué pieza depende de qué
+      frontera. Ninguna pieza de lógica propia debería depender de un adaptador:
+      si lo hace, la frontera no está haciendo su trabajo.
+    fanout:
+      min: 1
+      max: 40
+  - id: L4
+    requiredRoles: []
+    title: IMPLEMENTACIÓN
+    instruction: >
+      Escribe el código. Cada adaptador viene con su doble, y la lógica propia
+      se prueba sin levantar nada de fuera.
+    fanout:
+      min: 1
+      max: 70
+
+# La autorrevisión: qué comprobar del servicio entregado, y con qué acción.
+selfReview:
+  criteria:
+    - check: La cobertura de pruebas unitarias del código propio es al menos del 80%
+      how: Corre la suite con reporte de cobertura y lee el total de líneas.
+      evidence: medida
+    - check: No hay hallazgos de OWASP Top 10 en lo entregado
+      how: >
+        Revisa entrada sin validar, autenticación y control de acceso, secretos
+        en el árbol, y qué se registra de lo que llega de fuera.
+      evidence: medida
+    - check: Ninguna pieza de lógica propia depende de un adaptador
+      how: Sigue las dependencias declaradas en L3 desde cada servicio.
+      evidence: medida
+    - check: Cada frontera declarada en L2 tiene doble, y el doble cubre el fallo y la demora
+      how: Contrasta la lista de fronteras contra la de dobles, y lee cada doble.
+      evidence: medida
+    - check: Lo implementado cumple la intención declarada en L0, y no una parecida
+      evidence: juicio
+  groundingCheck: true
+  groundingScope: alguna api, módulo, clase, función o dato
+  assumptionsMustDeclare: true

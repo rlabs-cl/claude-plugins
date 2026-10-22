@@ -1,0 +1,72 @@
+# Autoría de un arquetipo.
+#
+# El arquetipo que se escribe es un fichero YAML de la carpeta de trabajo; el
+# descenso llega hasta él. Al aprobarse el paso, Arketum lo publica en el
+# catálogo que elige la persona; el hito del carril `arquetipo` lo confirma.
+#
+# Cambios:
+# - 1.3.0: crea también formas de sistema (tipo `forma_de_sistema`, en `formas/`), cuando el levantamiento eligió una nueva.
+# - 1.2.0: varios candidatos en un mismo paso (los que agrega la arquitectura).
+# - 1.1.0: también un stack (`stacks/<nombre>.yaml` de la carpeta de trabajo),
+#   que se publica en `stacks/` del catálogo elegido.
+name: arquetipo-autor
+version: 1.3.0
+description: >-
+  Escritura de un arquetipo nuevo: para qué tipo de artefacto, con qué tipos de elemento, extractores y niveles, hasta el fichero YAML que lo declara. Es el artefacto de trabajo del carril de arquetipo y, opcional, de los de producto nuevo y funcionalidad. Elígelo cuando ningún arquetipo de los catálogos describe lo que se va a construir.
+tags: [proceso, arquetipo, politica]
+
+kinds:
+  - name: objetivo
+    describes: "pieza de la solicitud (L0): qué tipo de artefacto describe el arquetipo"
+  - name: forma
+    describes: un tipo de elemento, un extractor o un nivel de la escalera que el arquetipo declara
+  - name: arquetipo
+    describes: el fichero YAML del arquetipo, en la carpeta de trabajo del paso
+  - name: stack
+    describes: "el fichero YAML de un stack (con qué se construye), en `stacks/` de la carpeta de trabajo del paso"
+  - name: forma_de_sistema
+    describes: "el fichero YAML de una forma de sistema (señales, `aplica`, diseño, huecos, variantes y escalones), en `formas/` de la carpeta de trabajo del paso"
+
+extractors:
+  - mechanism: path
+    kind: arquetipo
+    pattern: "<nombre>.yaml"
+  - mechanism: path
+    kind: stack
+    pattern: "stacks/<nombre>.yaml"
+  - mechanism: path
+    kind: forma_de_sistema
+    pattern: "formas/<nombre>.yaml"
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: SOLICITUD
+    instruction: >
+      Declara qué tipo de artefacto describirá el arquetipo y por qué ninguno de
+      los catálogos sirve.
+  - id: L1
+    requiredRoles: []
+    title: FORMA
+    instruction: >
+      Declara la forma: tipos de elemento, cómo se reconoce cada uno en el árbol
+      (extractores) y los niveles de la escalera con su instrucción.
+    fanout:
+      min: 1
+      max: 40
+  - id: L2
+    requiredRoles: []
+    title: ARQUETIPO
+    instruction: >
+      Declara el fichero del arquetipo (tipo `arquetipo`, con `location` a un
+      YAML de la carpeta de trabajo) o el de un stack (tipo `stack`, con
+      `location` a `stacks/<name>.yaml`). Tiene que cargar, su `name` es un slug
+      y el fichero se llama `<name>.yaml`. Si la arquitectura agrega varios,
+      uno por cada uno. Si el levantamiento eligió una forma de sistema nueva
+      («no_calza»), declara también su fichero (tipo `forma_de_sistema`, con
+      `location` a `formas/<name>.yaml`), con señales que su `aplica` cumple,
+      y, si sus variantes piden suelo o e2e, un stack con las fijaciones de
+      esa forma.
+    fanout:
+      min: 1
+      max: 20

@@ -1,0 +1,12 @@
+{
+  "name": "rlabs",
+  "owner": { "name": "rlabs" },
+  "description": "Plugins by rlabs.",
+  "plugins": [
+    {
+      "name": "arketum",
+      "source": "./arketum",
+      "description": "Arketum: a verified lifecycle for building software with an agent (work units, gates decided by you, requirements with evidence, and a local status panel)."
+    }
+  ]
+}

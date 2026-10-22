@@ -1,0 +1,167 @@
+# Stack: Python, con la biblioteca estándar y pytest.
+#
+# Un stack no es un arquetipo: no tiene niveles ni tipos propios. Dice dónde vive
+# cada tipo de pieza que declaran los componentes de las formas, las reglas del
+# oficio para quien construye y sus comandos (informativos). Arketum lo compone
+# con el componente de la variante de la forma del proyecto en un arquetipo
+# efectivo.
+#
+# Cambios:
+# - 1.1.0: un solo paquete con una subcarpeta por tipo y varios ficheros en
+#   cada una (`<paquete>/dominio/<nombre>.py`), como en Go; `pyproject.toml` en
+#   la raíz del artefacto; las plantillas y los estáticos de la interfaz;
+#   `conftest.py`, los ayudantes y los grupos anidados de `tests/`; los módulos
+#   sueltos del paquete, `py.typed` y `README.md`; las carpetas generadas.
+# - 1.2.0: las fijaciones (los suelos de `juego-terminal` y de
+#   `aplicacion-por-capas` y la ayuda e2e por terminal), sus comandos (`suelo`
+#   y `e2e`, que las invocan por ruta) y `arrancar.sh` como arranque, el
+#   contrato de arranque de las formas.
+# - 1.3.0: la ubicación `configura-pruebas` (`conftest.py`, `pytest.ini`,
+#   `setup.cfg`, `tox.ini`, `pyproject.toml`): lo que el cierre enseña cuando
+#   cambia, porque puede saltarse pruebas sin tocarlas. Antes lo sabía Arketum
+#   por el nombre; ahora lo dice el stack. TRANSICIÓN: la huella del stack y la
+#   del efectivo cambian; los descensos certificados con la anterior dan
+#   `stale_policy` hasta recertificarlos. Desde el catálogo oficial, con la
+#   versión nueva, la política fijada de una unidad viva no lo cuenta como cambio
+#   de política (lo vigila `stale_policy`); desde un catálogo de otra confianza,
+#   sí sale como cambio de la huella del stack. Un stack propio, o una copia de
+#   la 1.2.0, sin `configura-pruebas` deja de enseñar al cerrar los cambios a lo
+#   que configura las pruebas: `status` de una unidad lo avisa una vez.
+#   Y `noEjecutan`: los argumentos con que pytest no ejecuta ninguna prueba,
+#   que antes sabía Arketum.
+name: python
+version: 1.3.0
+description: >-
+  Python con la biblioteca estándar y pytest: un paquete por artefacto, con una subcarpeta por tipo de pieza (dominio, almacén, servicios, interfaz, API, clientes) y varios ficheros en cada una, `pyproject.toml` en la raíz del artefacto y las pruebas en `tests/<grupo>/`, unitarias y de extremo a extremo.
+
+# Rutas relativas a la raíz del artefacto. `<paquete>` casa con cualquier nombre
+# de carpeta: se usa como UN paquete, no una carpeta por tipo (Arketum no comprueba
+# que sea el mismo en todo el artefacto). Un tipo que vive en varios sitios lleva una
+# lista en `pattern`. Las exclusiones evitan que un grupo de pruebas que se llama
+# como un tipo (`tests/dominio/`) lo reclame ese tipo.
+ubicaciones:
+  # Los módulos sueltos del paquete (`config.py`, `errores.py`), su `__init__.py`
+  # y `py.typed`, el manifiesto y el README del artefacto. Un fichero suelto con
+  # el nombre de un tipo (`dominio.py`) no es un módulo: es código fusionado, y su
+  # sitio es la subcarpeta del tipo.
+  modulo:
+    pattern: ["<paquete>/<nombre>.py", "<paquete>/py.typed", "pyproject.toml", "README.md"]
+    excluding:
+      - "<paquete>/__main__.py"
+      - "<paquete>/dominio.py"
+      - "<paquete>/almacen.py"
+      - "<paquete>/servicios.py"
+      - "<paquete>/interfaz.py"
+      - "<paquete>/api.py"
+      - "<paquete>/clientes.py"
+      - "tests/<nombre>.py"
+      - "tests/py.typed"
+  dominio: { pattern: "<paquete>/dominio/<nombre>.py", excluding: ["tests/dominio/<nombre>.py"] }
+  almacen: { pattern: "<paquete>/almacen/<nombre>.py", excluding: ["tests/almacen/<nombre>.py"] }
+  servicio: { pattern: "<paquete>/servicios/<nombre>.py", excluding: ["tests/servicios/<nombre>.py"] }
+  interfaz:
+    pattern:
+      - "<paquete>/interfaz/<nombre>.py"
+      - "<paquete>/interfaz/plantillas/<nombre>.<ext>"
+      - "<paquete>/interfaz/plantillas/<carpeta>/<nombre>.<ext>"
+      - "<paquete>/interfaz/estaticos/<nombre>.<ext>"
+      - "<paquete>/interfaz/estaticos/<carpeta>/<nombre>.<ext>"
+    excluding:
+      - "tests/interfaz/<nombre>.py"
+      - "tests/interfaz/plantillas/<nombre>.<ext>"
+      - "tests/interfaz/plantillas/<carpeta>/<nombre>.<ext>"
+      - "tests/interfaz/estaticos/<nombre>.<ext>"
+      - "tests/interfaz/estaticos/<carpeta>/<nombre>.<ext>"
+  api: { pattern: "<paquete>/api/<nombre>.py", excluding: ["tests/api/<nombre>.py"] }
+  cliente: { pattern: "<paquete>/clientes/<nombre>.py", excluding: ["tests/clientes/<nombre>.py"] }
+  # `arrancar.sh` en la raíz del artefacto: el contrato de arranque de las formas (lo lanzan el suelo y la ayuda e2e).
+  arranque: { pattern: ["<paquete>/__main__.py", "arrancar.sh"], excluding: ["tests/__main__.py"] }
+  # Lo de `tests/`, hasta tres carpetas por debajo: pruebas, `conftest.py`,
+  # ayudantes (`helpers.py`, `fixtures.py`), `__init__.py`, grupos anidados y datos
+  # de prueba (`tests/datos/pedidos.json`). Un patrón por profundidad: un
+  # contenedor (`tests/`) clasificaría también las carpetas.
+  prueba:
+    pattern: ["tests/<nombre>.<ext>", "tests/<grupo>/<nombre>.<ext>", "tests/<grupo>/<carpeta>/<nombre>.<ext>", "tests/<grupo>/<carpeta>/<sub>/<nombre>.<ext>"]
+  # Lo que configura cómo se ejecutan las pruebas: no es un tipo de pieza (un
+  # `conftest.py` es también una prueba y `pyproject.toml` un módulo). El cierre
+  # lo enseña a la persona cuando cambia: puede saltarse pruebas sin tocarlas
+  # (de `pyproject.toml` y `setup.cfg` no se sabe si cambió su sección de pytest:
+  # salen siempre que cambian).
+  configura-pruebas:
+    pattern:
+      - pyproject.toml
+      - setup.cfg
+      - tox.ini
+      - pytest.ini
+      - conftest.py
+      - tests/conftest.py
+      - tests/<grupo>/conftest.py
+      - tests/<grupo>/<carpeta>/conftest.py
+      - tests/<grupo>/<carpeta>/<sub>/conftest.py
+
+# Cada muestra tiene que derivar exactamente su tipo: es la comprobación de solape.
+muestras:
+  modulo: [tienda/__init__.py, tienda/config.py, tienda/errores.py, tienda/py.typed, pyproject.toml, README.md]
+  dominio: [tienda/dominio/__init__.py, tienda/dominio/producto.py, tienda/dominio/pedido.py]
+  almacen: [tienda/almacen/__init__.py, tienda/almacen/repositorio.py]
+  servicio: [tienda/servicios/__init__.py, tienda/servicios/carrito.py, tienda/servicios/admin.py]
+  interfaz: [tienda/interfaz/__init__.py, tienda/interfaz/web.py, tienda/interfaz/plantillas/carrito.html, tienda/interfaz/plantillas/parciales/cabecera.html, tienda/interfaz/estaticos/estilo.css, tienda/interfaz/estaticos/css/estilo.css]
+  api: [tienda/api/__init__.py, tienda/api/rutas.py]
+  cliente: [tienda/clientes/__init__.py, tienda/clientes/pagos.py]
+  arranque: [tienda/__main__.py, arrancar.sh]
+  prueba:
+    - tests/conftest.py
+    - tests/__init__.py
+    - tests/helpers.py
+    - tests/test_humo.py
+    - tests/unidad/__init__.py
+    - tests/unidad/fixtures.py
+    - tests/unidad/test_carrito.py
+    - tests/unidad/dominio/test_pedido.py
+    - tests/dominio/test_pedido.py
+    - tests/interfaz/test_web.py
+    - tests/interfaz/plantillas/a.html
+    - tests/interfaz/estaticos/b.css
+    - tests/interfaz/estaticos/css/a.css
+    - tests/interfaz/plantillas/parciales/c.html
+    - tests/datos/pedidos.json
+    - tests/pedidos.json
+    - tests/e2e/conftest.py
+    - tests/e2e/test_compra.py
+  configura-pruebas: [pyproject.toml, pytest.ini, tox.ini, setup.cfg, tests/conftest.py, tests/e2e/conftest.py]
+
+# Lo que generan Python y pytest: no se reclama ni cuenta como cambio.
+generados: [__pycache__/, .pytest_cache/]
+
+oficio:
+  - Solo la biblioteca estándar; las pruebas con pytest. Una dependencia nueva se declara en `pyproject.toml` y se justifica.
+  - Un fichero por concepto dentro de la subcarpeta de su tipo (`dominio/pedido.py`, `servicios/carrito.py`); no se junta todo en uno.
+  - El dominio no lee ficheros, ni la terminal, ni el reloj ni la red; el instante entra como parámetro.
+  - Un fallo al leer lo guardado no se traga - se avisa y se para; nunca se sigue con vacío ni se sobrescribe.
+  - Las rutas a ficheros del propio código se resuelven desde `__file__`, nunca desde el directorio de trabajo.
+  - La carpeta de datos sale del entorno (`DATOS_DIR`), y las pruebas la ponen en una carpeta temporal.
+  - '`arrancar.sh` lanza el paquete con el intérprete del entorno (`exec python3 -m <paquete> "$@"`): es lo que lanzan el suelo y las pruebas e2e.'
+  - Las pruebas e2e (`tests/e2e/`) arrancan la aplicación con el lanzador `app` de la fijación e2e y la usan por la interfaz real, como una persona; nunca importan el paquete. Las fijaciones necesitan `pyte` y `pytest` (`python3 -m pip install -r arketum/fijaciones/e2e/requirements.txt`), que son de las pruebas, no del producto.
+
+# Fijas del catálogo: se copian tal cual en `arketum/fijaciones/<nombre>/` del
+# artefacto y no se editan (el cierre compara su checksum). Una por forma y cosa.
+fijaciones:
+  - { de: stacks/python/suelo-juego-terminal, nombre: suelo, para: suelo, formas: [juego-terminal] }
+  - { de: stacks/python/suelo-aplicacion-por-capas, nombre: suelo, para: suelo, formas: [aplicacion-por-capas] }
+  - { de: stacks/python/e2e-terminal, nombre: e2e, para: e2e, formas: [juego-terminal, aplicacion-por-capas] }
+
+# Los argumentos con los que su ejecutor de pruebas (pytest) no ejecuta ninguna: una
+# ejecución de la suite e2e con uno de ellos no cuenta como e2e.
+noEjecutan: [--co, --collect-only, --collectonly, --trace-config, --help, -h, --version, -V, --fixtures, --fixtures-per-test, --markers, --setup-plan, --setup-only]
+
+comandos:
+  pruebas: python3 -m pytest -q --ignore=tests/e2e
+  suelo: python3 -B arketum/fijaciones/suelo/suelo.py .
+  e2e: PYTHONPATH=arketum/fijaciones/e2e python3 -B -m pytest -q -c arketum/fijaciones/e2e/pytest.ini --rootdir=. tests/e2e
+
+
+selfReview:
+  criteria:
+    - check: Ninguna prueba depende de la red, del reloj de la máquina ni de una carpeta fuera de la temporal
+      how: Lee las fijaciones y las llamadas a `datetime.now`, `time.time` y `urllib` desde las pruebas.
+      evidence: medida

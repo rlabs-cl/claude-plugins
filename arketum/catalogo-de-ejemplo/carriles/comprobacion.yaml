@@ -1,0 +1,23 @@
+# La comprobación agrupada (la 35): comprueba juntos los ajustes sin comprobar.
+# Recertifica cada tocado contra el árbol de ahora (con descenso heredado; los
+# arreglos van aquí, con el mismo tope que un ajuste) y exige las salidas: el
+# suelo, la suite e2e entera y la e2e de cada funcional de los ajustes.
+name: comprobacion
+version: 1.0.0
+when: Comprobar juntos los ajustes sin comprobar, antes de desplegar o cuando se acumulan.
+comprueba: true
+milestones: [despliegue, entrega, ejecucion]
+steps:
+  - { id: sistema, kind: system, max_cambios: 8, piezas: L1 }
+  - id: comprobacion
+    salidas: true
+    kind: evidence
+    requires:
+      - { id: no-regresion, describes: lo que ya funcionaba sigue funcionando, classes: [execution], expect: success }
+  - id: hito
+    kind: milestone
+    optional: true
+    gate: true
+    confirmacion: true
+    requires:
+      - { id: cumplido, describes: la persona confirma que el hito se cumplió, classes: [statement] }

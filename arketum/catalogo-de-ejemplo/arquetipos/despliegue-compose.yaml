@@ -1,0 +1,104 @@
+# Despliegue con Docker Compose.
+#
+# Artefacto del sistema de una sola capa: la definición del despliegue, la
+# configuración de cada entorno (de ejemplo, nunca la real), su documentación y,
+# si se quiere, una prueba de humo (`humo.sh`, ubicación sugerida, no exigida).
+#
+# Cambios:
+# - 1.1.0: `verificacion` (`humo.sh`) deja de ser obligatoria: el hito `despliegue <entorno>` lo cumple la
+#   confirmación de la persona, y Arketum no exige una forma concreta de comprobar el despliegue. Su raíz es `despliegue/`, para no solaparse con una raíz
+# `.`: el compose se invoca como `docker compose -f despliegue/compose.yaml`.
+# Los demás modos (pipeline, script…) se publican por el paso `arquetipo`.
+name: despliegue-compose
+version: 1.1.0
+description: >-
+  Despliegue de un sistema con Docker Compose: la definición (`compose.yaml`), la configuración de ejemplo de cada entorno (`<entorno>.env.example`, nunca `.env`), su documentación (`DESPLIEGUE.md`) y, si se quiere, una prueba de humo (`humo.sh`), en la raíz `despliegue/`. Elígelo cuando el levantamiento de infraestructura acuerde el modo `compose`.
+tags: [despliegue, infraestructura, compose]
+# Gobierna un artefacto de despliegue: el carril `despliegue` exige uno así entre los tocados. Un arquetipo propio de
+# otro modo (pipeline, script…) lo declara igual.
+despliegue: true
+
+kinds:
+  - name: objetivo
+    describes: "pieza de la solicitud (L0): lo que se despliega y en qué entorno, de los técnicos del levantamiento"
+  - name: definicion
+    describes: la definición del despliegue (`compose.yaml`, o `compose.<entorno>.yaml` si un entorno la cambia)
+  - name: entorno
+    describes: "la configuración de ejemplo de un entorno (`<entorno>.env.example`): variables con marcadores, nunca valores secretos"
+  - name: verificacion
+    describes: "opcional: la prueba de humo (`humo.sh`), que comprueba contra lo desplegado que funciona, sin imprimir secretos"
+  - name: documentacion
+    describes: cómo se despliega, se verifica y se revierte cada entorno (`DESPLIEGUE.md`)
+
+extractors:
+  - mechanism: path
+    kind: definicion
+    pattern: "compose.yaml"
+    alternatives: ["compose.<entorno>.yaml"]
+  - mechanism: path
+    kind: entorno
+    pattern: "<entorno>.env.example"
+  - mechanism: path
+    kind: verificacion
+    pattern: "humo.sh"
+  - mechanism: path
+    kind: documentacion
+    pattern: "DESPLIEGUE.md"
+
+# Una definición sin documentación no la sabe operar nadie más. La prueba de humo
+# no se exige: si corrió lo confirma la persona en el hito.
+coRequirements:
+  - when: definicion
+    requires: [documentacion]
+    scope: artifact
+
+conventions:
+  oficio.1: >-
+    Los secretos no van en el repositorio: un `.env` dentro de `despliegue/` queda sin reclamar y no cierra la unidad.
+    Sácalo del repositorio, declara en su lugar su referencia (`<esquema>:<ruta>`) en el levantamiento de
+    infraestructura y deja en `<entorno>.env.example` la variable con un marcador (`DB_PASSWORD=<desde vault:kv/app/db>`).
+  oficio.2: >-
+    La validación en seco es `docker compose -f despliegue/compose.yaml config --quiet`, desde la raíz del proyecto;
+    la exige el paso `preparado` como una ejecución `on: change` con código 0. No necesita el daemon de Docker (solo
+    lee y valida la definición): se ejecuta de verdad aunque no se pueda levantar nada.
+  oficio.3: >-
+    `humo.sh`, si lo hay, comprueba lo desplegado por el camino real (una petición HTTP, una orden del programa) y
+    termina con 0 si funciona; recibe el entorno como argumento y no imprime ningún secreto. Es una ayuda, no una
+    exigencia: el hito `despliegue <entorno>` lo cumple la persona al confirmar que se desplegó y corrió; su ejecución
+    `on: entorno` (o el reporte del CI) se entrega como respaldo y sale en la pregunta.
+  oficio.4: >-
+    `DESPLIEGUE.md` dice, por entorno, cómo se despliega, cómo se comprueba que corrió (con `humo.sh` si lo hay), cómo se revierte y de dónde salen
+    las variables de cada `<entorno>.env.example`.
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: OBJETIVO
+    instruction: >
+      Declara qué se despliega y en qué entornos, atendiendo a los técnicos del
+      levantamiento de infraestructura (la entrada): el modo, cada entorno y lo
+      acordado de cada uno.
+  - id: L1
+    requiredRoles: []
+    title: PIEZAS
+    instruction: >
+      Propón las piezas: la definición, la configuración de ejemplo de cada
+      entorno (nunca la real: los secretos van por su referencia), la
+      documentación y, si ayuda, la prueba de humo. Un `.env` no es una pieza: queda fuera del
+      repositorio.
+    fanout:
+      min: 3
+      max: 20
+  - id: L2
+    requiredRoles: []
+    title: FICHEROS
+    instruction: >
+      Declara cada fichero con su `location`, relativa a `despliegue/`:
+      `compose.yaml`, `<entorno>.env.example`, `DESPLIEGUE.md` y, si lo hay,
+      `humo.sh`. Si
+      dentro de `despliegue/` hay un `.env`, sácalo del repositorio y declara su
+      referencia en el levantamiento de infraestructura: aquí no lo reclama
+      nadie, y una unidad con un fichero sin reclamar no cierra.
+    fanout:
+      min: 3
+      max: 30

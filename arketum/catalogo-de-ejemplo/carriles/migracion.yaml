@@ -1,0 +1,27 @@
+# Una migración: qué hace hoy el sistema, cómo se mueve (el plan fija los
+# tocados) y la evidencia de que funciona después. El inventario lo aprueba la
+# persona y alimenta al sistema: lo que hoy hace el sistema lo tiene que atender
+# lo migrado, y sus funciones pueden sembrar el índice de requisitos.
+#
+# Cambios:
+# - 1.2.0: el hito `despliegue <entorno>` cuenta (`humo: true`): exige la prueba de humo y que el entorno exista.
+# - 1.3.0: el hito `despliegue <entorno>` lo cumple la confirmación de la persona por el canal interactivo («¿se desplegó en <entorno> y corrió?», sí o no): la marca `humo` pasa a llamarse `confirmacion` y la prueba de humo deja de exigirse.
+name: migracion
+version: 1.3.0
+when: Llevar un sistema existente a otra forma, plataforma o arquitectura sin perder lo que hace.
+milestones: [despliegue, entrega, ejecucion]
+steps:
+  - { id: inventario, kind: artifact, archetype: { name: inventario-funcional }, gate: true, feeds: [sistema] }
+  - { id: plan, kind: artifact, archetype: { name: plan-de-migracion }, gate: true, fixesTouches: true, feeds: [sistema] }
+  - { id: sistema, kind: system, fedBy: [inventario, plan] }
+  - id: evidencia
+    kind: evidence
+    requires:
+      - { id: funciona, describes: lo migrado hace lo que hacía, classes: [execution], expect: success }
+  - id: hito
+    kind: milestone
+    optional: true
+    gate: true
+    confirmacion: true
+    requires:
+      - { id: cumplido, describes: la persona confirma que el hito se cumplió, classes: [statement] }

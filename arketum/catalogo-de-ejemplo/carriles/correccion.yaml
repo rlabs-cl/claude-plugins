@@ -1,0 +1,25 @@
+# Una corrección parte de no saber: la señal registra el fallo, el RCA
+# investiga y fija qué se toca y cómo se verifica.
+#
+# Cambios:
+# - 1.1.0: el hito `despliegue <entorno>` cuenta (`humo: true`): exige la prueba de humo y que el entorno exista.
+# - 1.2.0: el hito `despliegue <entorno>` lo cumple la confirmación de la persona por el canal interactivo («¿se desplegó en <entorno> y corrió?», sí o no): la marca `humo` pasa a llamarse `confirmacion` y la prueba de humo deja de exigirse.
+name: correccion
+version: 1.2.0
+when: Un fallo reportado o detectado, del que todavía no se sabe la causa.
+milestones: [despliegue, entrega, ejecucion]
+steps:
+  - id: senal
+    kind: evidence
+    requires:
+      - { id: fallo, describes: el fallo tal como llegó, classes: [execution, report, statement], expect: failure, on: before }
+  - { id: rca, kind: artifact, archetype: { name: rca }, gate: true, fixesTouches: true, feeds: [sistema, verificacion] }
+  - { id: sistema, kind: system, optional: true, fedBy: [rca] }
+  - { id: verificacion, kind: evidence, fedBy: [rca] }
+  - id: hito
+    kind: milestone
+    optional: true
+    gate: true
+    confirmacion: true
+    requires:
+      - { id: cumplido, describes: la persona confirma que el hito se cumplió, classes: [statement] }

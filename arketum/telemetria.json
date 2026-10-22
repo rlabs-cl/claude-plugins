@@ -1,0 +1,27 @@
+{
+  "$comentario": "El destino de la telemetría (tl-t03): adónde va el resumen anónimo de uso, con qué clave, con qué nombre de evento y con qué forma de sobre, y las marcas de cada canal de instalación (tl-t06). src/ no lo nombra: el empaquetado copia este fichero junto al código del paquete npm y del plugin, y el código lo lee de ahí. La clave del proyecto que recibe es pública y solo sirve para escribir; vacía, no se envía nada. Cambiar de destino, o autoalojarlo, es cambiar este fichero.",
+  "url": "https://eu.i.posthog.com/i/v0/e/",
+  "clave": "phc_snA2a4zN5Qku7qrZp6JQ2QdrYRX8phZvJa6AptDyiRwr",
+  "evento": "arketum_resumen",
+  "sobre": {
+    "clave": "api_key",
+    "evento": "event",
+    "id": "distinct_id",
+    "momento": "timestamp",
+    "propiedades": "properties"
+  },
+  "fijas": {
+    "$process_person_profile": false,
+    "$geoip_disable": true
+  },
+  "garantias": {
+    "$comentario": "Lo que garantiza cada propiedad fija, con el valor que la cumple: que el destino no cree un perfil de persona y que no derive la ubicación de la conexión. Las pruebas comprueban estas garantías por su nombre, sin nombrar las propiedades del proveedor.",
+    "sin_perfil": ["$process_person_profile", false],
+    "sin_ubicacion": ["$geoip_disable", true]
+  },
+  "canales": {
+    "plugin": { "variable": "plugin" },
+    "npx": { "ruta": ["_npx"] },
+    "npm-global": { "ruta": ["lib/node_modules", "npm/node_modules"] }
+  }
+}

@@ -1,0 +1,185 @@
+# Forma de sistema: una aplicación de un solo despliegue, con datos que
+# persisten o con varias pantallas o actores.
+#
+# Cambios:
+# - 1.2.0: los papeles de la fase 2 (`implementador` y `revisor`) y las
+#   salidas (`suelo` y `e2e`) en las dos variantes; el contrato de arranque
+#   en el `oficio` del componente.
+# - 1.1.0: señales `pantallas` y `actores`; variantes (`simple` y `completa`,
+#   con el componente `aplicacion`) y los escalones `varios-actores`,
+#   `varias-pantallas` e `integraciones`. Un artefacto con capas declara `stack`
+#   y `componente: aplicacion`; la profundidad la pone la variante.
+name: aplicacion-por-capas
+version: 1.2.0
+description: >-
+  Una aplicación de un solo despliegue con datos que persisten, o con varias pantallas o actores: sus reglas separadas de cómo se guardan los datos y de cómo se usa.
+orden: 2
+senales:
+  despliegues: numero
+  integraciones: numero
+  pantallas: numero
+  actores: numero
+aplica:
+  - [despliegues, '<=', 1]
+  - [integraciones, '<=', 3]
+diseno:
+  - Una sola aplicación, con sus reglas separadas de cómo se guardan los datos y de cómo se usa (pantallas o comandos).
+  - Lo que se guarda sobrevive a cerrar y volver a abrir; si no se puede leer, se avisa y no se sigue con vacío ni se sobrescribe.
+  - Las reglas que dependen del tiempo reciben el instante; no dependen de cuándo se ejecutan.
+huecos:
+  - Qué datos se guardan, de dónde salen los primeros y qué tiene que seguir ahí al cerrar y volver a abrir.
+  - Qué se calcula a partir del tiempo (días, semanas, cambios de fecha) y desde cuándo cuenta.
+  - Quién la usa, para qué cada uno, y qué puede cambiar cada uno.
+  - Qué hay que poder corregir cuando alguien se equivoca, y si importa lo que había antes.
+  - Qué pasa si los datos guardados se estropean o no se pueden leer.
+
+variantes:
+  - nombre: simple
+    aplica:
+      - [actores, '<=', 1]
+      - [pantallas, '<=', 2]
+    papeles: &papeles
+      - nombre: implementador
+        para_que: construye el sistema en el paso de sistema (el código, sus pruebas y las salidas que exige el paso de evidencia)
+        texto: >-
+          PAPEL: IMPLEMENTADOR (fase 2). Construyes lo acordado, nada más: los requisitos que trae la unidad y los técnicos vigentes, con el oficio del arquetipo.
+          Desciendes cada artefacto tocado nivel a nivel y el código se queda como lo pide su stack; no lo deformas para encajar.
+          Cada funcional que construyes lleva su prueba de extremo a extremo, que arranca el artefacto por su contrato de arranque y lo usa como una persona:
+          una prueba que llama por dentro a una función que el camino real no usa no demuestra nada.
+          Copias las fijaciones del catálogo tal cual y no las editas. Corres tú las pruebas, el suelo y la suite e2e entera, y vinculas cada ejecución
+          a sus requisitos con `satisfies`. No rebajas ni borras una prueba para que pase. Si algo que funcionaba se rompe, lo arreglas;
+          si no puedes, lo reportas con `solicitar` (`pide: defecto`) y decide la persona. Nunca lo escondes.
+      - nombre: revisor
+        para_que: revisa en el paso de evidencia que lo construido funciona por el camino real, antes de entregar la evidencia
+        texto: >-
+          PAPEL: REVISOR (fase 2). No escribes el código: lo revisas como lo usaría la persona. Compruebas que cada funcional construido tiene su prueba e2e,
+          que arranca el artefacto por su contrato de arranque y no lo llama por dentro, y que pasa; que las fijaciones del catálogo no se tocaron;
+          y miras las pruebas modificadas o borradas desde la foto (las lista el resumen del paso): si alguna se rebajó para que pase, lo dices.
+          Corres el suelo y la suite e2e entera con el comando compuesto exacto y entregas esa evidencia. Lo que falla no lo das por bueno:
+          se arregla, o se reporta como defecto con `solicitar` y decide la persona. Si un funcional no admite una prueba automática
+          (un correo, algo visual, una integración externa), lo pides con `solicitar` (`pide: sin_e2e`), con el motivo.
+    salidas: { suelo: true, e2e: true }
+    componentes:
+      - nombre: aplicacion
+        oficio: &oficio
+          - "Arranque: la aplicación se lanza con `sh arrancar.sh` desde la raíz del artefacto, en una terminal. Recibe del entorno `DATOS_DIR` (la carpeta de sus datos) y `PUERTO` (si sirve HTTP, escucha en 127.0.0.1 en ese puerto). Escribe en la terminal qué es y cómo se sale, responde a lo que se teclea, termina limpio (código 0) con `q`, con `salir` y Enter o al cerrarse la entrada, y vuelve a arrancar con los datos que dejó."
+        description: >-
+          La aplicación entera, en tres peldaños: lo que se pide, sus capas y el código, con el dominio separado del almacén y de la interfaz.
+        kinds:
+          - { name: objetivo, describes: "pieza de la solicitud (L0), sin ubicación en el árbol", ubicado: false }
+          - { name: modulo, describes: la definición del paquete o del módulo, ubicado: true }
+          - { name: dominio, describes: "las entidades y sus reglas, puras: sin ficheros, sin interfaz y sin leer el reloj", ubicado: true }
+          - { name: almacen, describes: guardar y cargar el estado, ubicado: true }
+          - { name: servicio, describes: "un caso de uso por acción, sobre el dominio y el almacén, sin interfaz", ubicado: true }
+          - { name: interfaz, describes: "la presentación y la lectura de órdenes; llama a los servicios", ubicado: true }
+          - { name: cliente, describes: el único sitio que habla con otro sistema, ubicado: true }
+          - { name: arranque, describes: "compone almacén, servicios e interfaz y arranca", ubicado: true }
+          - { name: prueba, describes: fichero de prueba, ubicado: true }
+        coRequirements:
+          - { when: servicio, requires: [prueba] }
+        levels:
+          - id: L0
+            requiredRoles: []
+            title: SOLICITUD
+            instruction: Declara qué tiene que hacer la aplicación, para quién y qué tiene que seguir ahí al cerrarla y volver a abrirla.
+          - id: L1
+            requiredRoles: []
+            title: CAPAS
+            instruction: Propón las piezas por capa (dominio, almacén, servicios, interfaz, arranque), con el dominio sin ficheros ni interfaz.
+            fanout: { min: 3, max: 16 }
+          - id: L2
+            requiredRoles: []
+            title: IMPLEMENTACIÓN
+            instruction: Escribe el código; cada servicio con su prueba, que no abre la interfaz.
+            fanout: { min: 1, max: 60 }
+        selfReview:
+          criteria:
+            - check: La interfaz solo llama a los servicios; nunca al almacén ni a ficheros
+              how: Busca en la interfaz cualquier uso del almacén o de ficheros.
+              evidence: medida
+            - check: Lo que se guarda sobrevive a cerrar y volver a abrir, y un fallo al leerlo se avisa
+              how: Lee la prueba que guarda, vuelve a cargar y la que lee un fichero estropeado.
+              evidence: medida
+  - nombre: completa
+    aplica: []
+    papeles: *papeles
+    salidas: { suelo: true, e2e: true }
+    componentes:
+      - nombre: aplicacion
+        oficio: *oficio
+        description: >-
+          La aplicación entera, en cinco peldaños: lo que se pide, sus capas, sus contratos, el cableado y el código.
+        kinds:
+          - { name: objetivo, describes: "pieza de la solicitud (L0), sin ubicación en el árbol", ubicado: false }
+          - { name: modulo, describes: la definición del paquete o del módulo, ubicado: true }
+          - { name: dominio, describes: "las entidades y sus reglas, puras: sin ficheros, sin interfaz y sin leer el reloj", ubicado: true }
+          - { name: almacen, describes: guardar y cargar el estado, ubicado: true }
+          - { name: servicio, describes: "un caso de uso por acción, sobre el dominio y el almacén, sin interfaz", ubicado: true }
+          - { name: interfaz, describes: "la presentación y la lectura de órdenes; llama a los servicios", ubicado: true }
+          - { name: cliente, describes: el único sitio que habla con otro sistema, ubicado: true }
+          - { name: arranque, describes: "compone almacén, servicios e interfaz y arranca", ubicado: true }
+          - { name: prueba, describes: fichero de prueba, ubicado: true }
+          - { name: dependencia, describes: "arista del cableado (L3) entre dos piezas declaradas", ubicado: false }
+        coRequirements:
+          - { when: servicio, requires: [prueba] }
+          - { when: almacen, requires: [prueba] }
+        levels:
+          - id: L0
+            requiredRoles: []
+            title: SOLICITUD
+            instruction: Declara qué tiene que hacer la aplicación, para quién y qué tiene que seguir ahí al cerrarla y volver a abrirla.
+          - id: L1
+            requiredRoles: []
+            title: CAPAS
+            instruction: Propón las piezas por capa (dominio, almacén, servicios, interfaz, arranque), con el dominio sin ficheros ni interfaz.
+            fanout: { min: 3, max: 20 }
+          - id: L2
+            requiredRoles: []
+            title: CONTRATOS
+            instruction: Declara cada caso de uso con lo que recibe, lo que devuelve y cómo falla; y qué guarda el almacén.
+            fanout: { min: 1, max: 40 }
+          - id: L3
+            requiredRoles: []
+            title: CABLEADO
+            instruction: Declara qué depende de qué; el dominio no depende de nadie y la interfaz solo de los servicios.
+            fanout: { min: 1, max: 50 }
+          - id: L4
+            requiredRoles: []
+            title: IMPLEMENTACIÓN
+            instruction: Escribe el código; cada servicio y el almacén con su prueba, que no abre la interfaz.
+            fanout: { min: 1, max: 90 }
+        selfReview:
+          criteria:
+            - check: La interfaz solo llama a los servicios; nunca al almacén ni a ficheros
+              how: Sigue las dependencias declaradas en L3 desde la interfaz.
+              evidence: medida
+            - check: Lo que se guarda sobrevive a cerrar y volver a abrir, y un fallo al leerlo se avisa
+              how: Lee la prueba que guarda, vuelve a cargar y la que lee un fichero estropeado.
+              evidence: medida
+
+escalones:
+  - nombre: varios-actores
+    cuando:
+      - [actores, '>=', 2]
+    diseno:
+      - Cada actor tiene su vía y solo ve lo suyo; lo que es de gestión no se mezcla con el uso diario.
+    huecos:
+      - Qué puede hacer cada actor y qué no, y cómo se sabe quién es.
+    oficio:
+      - Cada actor tiene su vía en la interfaz; lo que es de gestión no se mezcla con el uso diario.
+  - nombre: varias-pantallas
+    cuando:
+      - [pantallas, '>=', 3]
+    oficio:
+      - Cada pantalla es una función de la interfaz con su propia lectura de órdenes; un mismo menú no se copia en varios sitios.
+  - nombre: integraciones
+    cuando:
+      - [integraciones, '>=', 1]
+    diseno:
+      - Cada sistema ajeno se usa a través de un solo sitio, que se puede sustituir por un doble para probar.
+    huecos:
+      - Qué pasa cuando el otro sistema falla, tarda o responde algo inesperado.
+    oficio:
+      - Cada cliente de otro sistema tiene un doble para probar sin el sistema real, que cubre el fallo y la demora.
+    coRequirements:
+      - { when: cliente, requires: [prueba] }

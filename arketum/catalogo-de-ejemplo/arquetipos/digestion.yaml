@@ -1,0 +1,97 @@
+# Digestión de un código que ya existe.
+#
+# Su último nivel es la estructura base del proyecto: los artefactos (con su
+# stack y su componente, o su arquetipo), la forma con sus señales (cada una con
+# las rutas del árbol que la sostienen), el andamiaje y la cobertura. Arketum
+# añade en la guía de cada nivel lo que calcula del árbol: las raíces candidatas
+# (por las ubicaciones de raíz de los stacks), el encaje de cada stack y lo que
+# queda fuera. La variante y los escalones los deriva Arketum de las señales.
+#
+# Cambios:
+# - 1.1.0: cada artefacto lleva su juicio de ajuste (`ajuste`, `por_que` y, si
+#   nada calza, `nuevo`), como en la arquitectura (convención `ajuste: obligatorio`).
+# - 1.2.0: la forma también lleva su juicio de ajuste (`ajuste` y `por_que`); una
+#   digestión no crea formas: si ninguna calza, se crea antes con el carril de
+#   arquetipo, o se digiere con reservas (convención `ajuste_forma: obligatorio`).
+# - 1.3.0: forzar una forma que no cumple su `aplica` lo elige la persona: su
+#   respuesta, en el atributo `eleccion` de la `forma`.
+name: digestion
+version: 1.3.0
+description: >-
+  Digestión de un código que ya existe: de lo que hay en el árbol a la estructura base de Arketum (artefactos, forma con sus señales, andamiaje y cobertura), sin cambiar código ni inferir requisitos. Es el artefacto de trabajo del carril `digestion`.
+tags: [proceso, digestion, proyecto]
+
+kinds:
+  - name: raiz
+    describes: "una raíz candidata del árbol (L0); atributo `path`"
+  - name: fuera
+    describes: "un grupo de rutas que no cae en ninguna raíz candidata (L0); atributo `path`"
+  - name: decision
+    describes: "qué es una raíz o un grupo (L1): un artefacto con capas (`stack` y `componente`), uno de una sola capa (`archetype`) o andamiaje"
+  - name: artefacto
+    describes: "un artefacto del proyecto (L2); id = el del artefacto; atributos `root`, `archetype` (nombre o nombre@versión) o, con capas, `stack` y `componente`, `dependsOn` y `touchWith` (ids separados por comas); y el juicio de ajuste: `ajuste` («calza», «calza_con_reservas» o «no_calza»), `por_que` (los elementos del caso de uso que inclinan a esta elección; con reservas, cuáles) y, con «no_calza», `nuevo` (por qué ninguno de los que hay calza y qué tendría el que se agrega)"
+  - name: andamiaje
+    describes: "algo que ningún arquetipo gobierna (L2); atributo `path` (acabado en / para una carpeta)"
+  - name: cobertura
+    describes: "la cobertura del proyecto (L2); atributo `value`: aviso o bloquea"
+  - name: forma
+    describes: "la forma de sistema (L2); atributo `name`, su juicio de ajuste (`ajuste`: «calza», que cumple su `aplica`, o «calza_con_reservas», con lo que se fuerza; y `por_que`, lo que en el árbol inclina a ella) y, si no cumple su `aplica` sin reservas, `motivo`; si no cumple su `aplica`, `eleccion`: lo que respondió la persona a forzarla o crear una nueva; la variante y los escalones los deriva Arketum (si los declaras, `variante` y `escalones`, tienen que casar; si ninguna variante aplica, `motivo_variante`)"
+  - name: senal
+    describes: "una señal de la forma (L2); id = la señal; atributos `valor` (con su tipo), `porque` y `rutas` (rutas del árbol que la sostienen, separadas por comas)"
+  - name: retirar
+    describes: "en un proyecto con artefactos, uno que sale de `proyecto.yaml` (L2); id = el artefacto (sin raíz, sin unidad viva y sin requisitos vivos)"
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: RAÍCES
+    instruction: >
+      Lee el árbol (rutas, no contenidos) y lo que Arketum calcula de él en esta
+      guía. Declara un elemento `raiz` por cada raíz que vayas a proponer
+      (atributo `path`; `.` es la raíz del proyecto) y un elemento `fuera` por
+      cada grupo de rutas que no cae en ninguna (atributo `path`).
+    fanout:
+      min: 1
+      max: 40
+  - id: L1
+    requiredRoles: []
+    title: STACKS
+    instruction: >
+      Por cada raíz y cada grupo de fuera, un elemento `decision` (con su padre
+      en L0): con capas, `stack` y `componente` (el stack con más encaje no es
+      obligatorio, pero lo que dejas sin reclamar sale en el gate); de una sola
+      capa, `archetype`; o `andamiaje`. Lee del código lo justo para decidir la
+      forma del sistema: cuántos despliegues, pantallas, actores e integraciones,
+      y qué rutas lo muestran.
+    fanout:
+      min: 1
+      max: 40
+  - id: L2
+    requiredRoles: []
+    title: ESTRUCTURA BASE
+    instruction: >
+      Declara la estructura base, cada elemento con su padre en L1: un
+      `artefacto` por artefacto (atributos `root` y `stack` y `componente`, o
+      `archetype`; `dependsOn` y `touchWith` si hacen falta), un `andamiaje` por
+      ruta que no gobierna nadie (atributo `path`), una `cobertura` (`aviso` sobre
+      un código que ya existe), la `forma` (atributo `name`) y una `senal` por
+      cada señal de la forma, con `valor`, `porque` y `rutas` (las rutas del árbol
+      que la sostienen). Lo que dejes fuera de toda raíz y del andamiaje no se
+      rechaza: sale en el gate como lo que queda fuera (será deriva
+      `fuera_de_raiz`), y la persona decide caso a caso.
+      La variante y los escalones los deriva Arketum de las señales. En un
+      proyecto con artefactos, `retirar` los que ya no tienen raíz. No declares
+      requisitos: sembrarlos es otra unidad.
+      La `forma` lleva también su juicio de ajuste (`ajuste` y `por_que`): una digestión no crea formas; si ninguna calza, se crea antes con el carril de arquetipo, o se digiere con reservas. Si la más cercana no cumple su `aplica`, forzarla lo elige la persona, no tú: Arketum te da la pregunta, y su respuesta va en el atributo `eleccion` de la `forma`.
+      Cada `artefacto` lleva su juicio de ajuste: si lo elegido calza con el caso de uso (`ajuste`: calza, calza_con_reservas o no_calza), los elementos del caso que inclinan a esa elección (`por_que`) y, si nada de lo que hay en los catálogos calza, `nuevo`: por qué ninguno calza y qué tendría el que se agrega, con un nombre propio que no exista. Elige la mejor alternativa para el caso de uso, no la que está a mano: crear uno nuevo siempre es una alternativa; si se agrega, Arketum incluye el paso que lo crea y la persona lo aprueba allí.
+    # Un elemento por artefacto y por andamiaje, la cobertura, la forma, sus
+    # señales (hasta siete en el catálogo de ejemplo) y lo que se retira: 120
+    # deja sitio a un monorepo de unas cien piezas sin partir la digestión.
+    fanout:
+      min: 1
+      max: 120
+
+# El juicio de ajuste de cada artefacto de la estructura base lo exige Arketum al entregar el último nivel.
+conventions:
+  ajuste: obligatorio
+  ajuste_forma: obligatorio

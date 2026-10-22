@@ -1,0 +1,74 @@
+# Stack: Go.
+#
+# Toma las ubicaciones de `servicio-con-integracion` (1.1.0): cada paquete en
+# `internal/`, con las pruebas `<nombre>_test.go` junto a lo que prueban; cada
+# ubicación de código las excluye, para que solo las reclame `prueba`.
+#
+# Cambios:
+# - 1.1.0: las fijaciones de `juego-terminal` y de `aplicacion-por-capas` (los suelos y la ayuda e2e por
+#   terminal, de caja negra en Python), sus comandos y `arrancar.sh` como
+#   arranque; las pruebas e2e en `tests/e2e/`; lo que genera Python.
+# - 1.2.0: `noEjecutan`, los argumentos con que el ejecutor de la suite e2e
+#   (pytest) no ejecuta ninguna prueba, que antes sabía Arketum. TRANSICIÓN: la
+#   huella del stack y la del efectivo cambian; los descensos certificados con la
+#   anterior dan `stale_policy` hasta recertificarlos.
+name: go
+version: 1.2.0
+description: >-
+  Go: un módulo por artefacto, con sus paquetes en `internal/` y las pruebas `<nombre>_test.go` junto al código; `go.mod` y `go.sum` como módulo, `cmd/<binario>/main.go` y `arrancar.sh` como arranque, y las pruebas de extremo a extremo, de caja negra, en `tests/e2e/`.
+
+ubicaciones:
+  modulo: { pattern: "go.<fichero>" }
+  dominio: { pattern: "internal/dominio/<nombre>.go", excluding: ["internal/dominio/<nombre>_test.go"] }
+  almacen: { pattern: "internal/almacen/<nombre>.go", excluding: ["internal/almacen/<nombre>_test.go"] }
+  servicio: { pattern: "internal/servicios/<nombre>.go", excluding: ["internal/servicios/<nombre>_test.go"] }
+  interfaz: { pattern: "internal/interfaz/<nombre>.go", excluding: ["internal/interfaz/<nombre>_test.go"] }
+  api: { pattern: "internal/api/<nombre>.go", excluding: ["internal/api/<nombre>_test.go"] }
+  cliente: { pattern: "internal/clientes/<nombre>.go", excluding: ["internal/clientes/<nombre>_test.go"] }
+  arranque: { pattern: ["cmd/<binario>/main.go", "arrancar.sh"] }
+  prueba: { pattern: ["internal/<paquete>/<nombre>_test.go", "tests/e2e/<nombre>.py"] }
+
+muestras:
+  modulo: [go.mod, go.sum]
+  dominio: [internal/dominio/pedido.go]
+  almacen: [internal/almacen/sqlite.go]
+  servicio: [internal/servicios/pedidos.go]
+  interfaz: [internal/interfaz/web.go]
+  api: [internal/api/rutas.go]
+  cliente: [internal/clientes/catalogo.go]
+  arranque: [cmd/tienda/main.go, arrancar.sh]
+  prueba: [internal/servicios/pedidos_test.go, internal/dominio/pedido_test.go, tests/e2e/test_partida.py, tests/e2e/conftest.py]
+
+# Lo que generan las pruebas e2e y las fijaciones, que son de Python.
+generados: [__pycache__/, .pytest_cache/]
+
+oficio:
+  - Toda frontera con otro sistema es una interfaz que el servicio declara tal como la necesita, con un doble para probar sin el sistema real.
+  - 'Los errores se devuelven y se envuelven con contexto (`fmt.Errorf("…: %w", err)`); nunca se ignoran ni se convierten en `panic`.'
+  - Ningún paquete de `internal/` importa `cmd/`; el cableado vive en `cmd/<binario>/main.go`.
+  - El contexto (`context.Context`) viaja como primer parámetro en lo que habla con fuera.
+  - '`arrancar.sh` compila y lanza el binario (`go run ./cmd/<binario> "$@"`, o el binario ya construido): es lo que lanzan el suelo y las pruebas e2e.'
+  - Las pruebas e2e (`tests/e2e/`, de caja negra, con pytest) arrancan el programa con el lanzador `app` (o `juego`) de la fijación e2e y lo usan por la terminal, como una persona. Las fijaciones necesitan `python3` con `pyte` y `pytest` (`python3 -m pip install -r arketum/fijaciones/e2e/requirements.txt`), que son de las pruebas, no del producto.
+
+# Fijas del catálogo: se copian tal cual en `arketum/fijaciones/<nombre>/` del
+# artefacto y no se editan (el cierre compara su checksum).
+fijaciones:
+  - { de: stacks/go/suelo-juego-terminal, nombre: suelo, para: suelo, formas: [juego-terminal] }
+  - { de: stacks/go/suelo-aplicacion-por-capas, nombre: suelo, para: suelo, formas: [aplicacion-por-capas] }
+  - { de: stacks/go/e2e-terminal, nombre: e2e, para: e2e, formas: [juego-terminal, aplicacion-por-capas] }
+
+# Los argumentos con los que su ejecutor de pruebas de la suite e2e (pytest, por la ayuda e2e de caja negra) no ejecuta ninguna: una
+# ejecución de la suite e2e con uno de ellos no cuenta como e2e.
+noEjecutan: [--co, --collect-only, --collectonly, --trace-config, --help, -h, --version, -V, --fixtures, --fixtures-per-test, --markers, --setup-plan, --setup-only]
+
+comandos:
+  pruebas: go test ./...
+  suelo: python3 -B arketum/fijaciones/suelo/suelo.py .
+  e2e: PYTHONPATH=arketum/fijaciones/e2e python3 -B -m pytest -q -c arketum/fijaciones/e2e/pytest.ini --rootdir=. tests/e2e
+
+
+selfReview:
+  criteria:
+    - check: La cobertura de pruebas del código propio es al menos del 80%
+      how: Corre `go test -cover ./...` y lee el total.
+      evidence: medida

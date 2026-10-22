@@ -1,0 +1,40 @@
+# Plan de migración.
+#
+# Los movimientos que llevan del sistema actual al nuevo, cada uno con los
+# artefactos que toca. Al aprobarse, fija los tocados de la unidad.
+name: plan-de-migracion
+version: 1.0.0
+description: >-
+  Los movimientos que llevan un sistema existente a su forma nueva, en orden y con los artefactos que toca cada uno. Es el artefacto de trabajo del carril de migración que fija los tocados. Elígelo para planificar una migración; para acotar un cambio sin migrar corresponde el radio de alcance.
+tags: [proceso, migracion, plan]
+
+kinds:
+  - name: objetivo
+    describes: "pieza de la solicitud (L0): de dónde a dónde se migra"
+  - name: movimiento
+    describes: "un paso de la migración; atributo `touches`: los artefactos del proyecto que toca, separados por comas"
+  - name: documento
+    describes: el fichero del plan, en la carpeta de trabajo del paso
+
+extractors:
+  - mechanism: path
+    kind: documento
+    pattern: "<nombre>.md"
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: MIGRACIÓN
+    instruction: >
+      Declara de dónde a dónde se migra y qué no se puede perder (el inventario
+      funcional).
+  - id: L1
+    requiredRoles: []
+    title: MOVIMIENTOS
+    instruction: >
+      Declara los movimientos en orden, cada uno con el atributo `touches` (los
+      artefactos del proyecto que toca, separados por comas), y el fichero del
+      plan (tipo `documento`, con su `location`).
+    fanout:
+      min: 1
+      max: 60

@@ -1,0 +1,207 @@
+# Forma de sistema: dos o tres aplicaciones que se despliegan por separado, en
+# un mismo repositorio, con frontera.
+#
+# Cambios:
+# - 1.2.0: los papeles de la fase 2 (`implementador` y `revisor`) en las
+#   dos variantes. Sin salidas: el suelo y el e2e de varios despliegues
+#   levantan el sistema entero, y eso no cabe en las salidas de un artefacto.
+# - 1.1.0: señales `actores`, `consumidores` y `volumen`; variantes (`simple` y
+#   `completa`, con los componentes `duena` y `consumidora`) y los escalones
+#   `varios-actores`, `consumido-por-sistemas`, `mucho-volumen` e
+#   `integraciones`. Un artefacto con capas declara `stack` y `componente`.
+name: monorepo-de-aplicaciones
+version: 1.2.0
+description: >-
+  Dos o tres aplicaciones que se despliegan por separado en un mismo repositorio, con frontera: la que mantiene el dato principal es su dueña y las demás lo leen por su API.
+orden: 3
+senales:
+  despliegues: numero
+  integraciones: numero
+  actores: numero
+  consumidores: texto
+  volumen: numero
+aplica:
+  - [despliegues, '>=', 2]
+  - [despliegues, '<=', 3]
+  - [integraciones, '<=', 3]
+diseno:
+  - Son dos aplicaciones que se despliegan por separado; la que mantiene el dato principal es su dueña.
+  - La dueña del dato es la única que lo escribe; las demás (y cualquier otro sistema) solo lo leen, y solo a través de su API.
+  - Cada aplicación que no es dueña tiene que poder cambiarse o sustituirse sin tocar a la dueña.
+  - Lo que cada aplicación guarda por su cuenta es suyo y está separado del dato principal.
+  - El dato principal y lo que guarda cada aplicación sobreviven a reinicios; los datos de partida se cargan una vez desde lo que se usa hoy.
+huecos:
+  - Cuáles son las aplicaciones (lo que usa cada tipo de persona o sistema) y si cada una tiene que poder cambiarse o sustituirse sin tocar la otra.
+  - De quién es cada dato (quién lo escribe y lo corrige) y quién solo lo lee.
+  - Qué otros sistemas usan alguna de las aplicaciones, qué pueden hacer con ellas y qué no.
+  - Qué guarda cada aplicación por su cuenta, además del dato principal.
+  - De dónde salen los datos de hoy, cuántos son, cómo se pasan al sistema y qué tiene que sobrevivir a un reinicio.
+  - Cuándo tiene que verse en una aplicación un cambio hecho en la otra.
+
+variantes:
+  - nombre: simple
+    aplica:
+      - [despliegues, '<=', 2]
+      - [actores, '<=', 1]
+    papeles: &papeles
+      - nombre: implementador
+        para_que: construye el sistema en el paso de sistema (el código, sus pruebas y las salidas que exige el paso de evidencia)
+        texto: >-
+          PAPEL: IMPLEMENTADOR (fase 2). Construyes lo acordado, nada más: los requisitos que trae la unidad y los técnicos vigentes, con el oficio del arquetipo.
+          Desciendes cada artefacto tocado nivel a nivel y el código se queda como lo pide su stack; no lo deformas para encajar.
+          Cada funcional que construyes lleva su prueba de extremo a extremo, que arranca el artefacto por su contrato de arranque y lo usa como una persona:
+          una prueba que llama por dentro a una función que el camino real no usa no demuestra nada.
+          Copias las fijaciones del catálogo tal cual y no las editas. Corres tú las pruebas, el suelo y la suite e2e entera, y vinculas cada ejecución
+          a sus requisitos con `satisfies`. No rebajas ni borras una prueba para que pase. Si algo que funcionaba se rompe, lo arreglas;
+          si no puedes, lo reportas con `solicitar` (`pide: defecto`) y decide la persona. Nunca lo escondes.
+      - nombre: revisor
+        para_que: revisa en el paso de evidencia que lo construido funciona por el camino real, antes de entregar la evidencia
+        texto: >-
+          PAPEL: REVISOR (fase 2). No escribes el código: lo revisas como lo usaría la persona. Compruebas que cada funcional construido tiene su prueba e2e,
+          que arranca el artefacto por su contrato de arranque y no lo llama por dentro, y que pasa; que las fijaciones del catálogo no se tocaron;
+          y miras las pruebas modificadas o borradas desde la foto (las lista el resumen del paso): si alguna se rebajó para que pase, lo dices.
+          Corres el suelo y la suite e2e entera con el comando compuesto exacto y entregas esa evidencia. Lo que falla no lo das por bueno:
+          se arregla, o se reporta como defecto con `solicitar` y decide la persona. Si un funcional no admite una prueba automática
+          (un correo, algo visual, una integración externa), lo pides con `solicitar` (`pide: sin_e2e`), con el motivo.
+    componentes:
+      - nombre: duena
+        description: >-
+          La aplicación dueña del dato principal, en tres peldaños: lo que se pide, sus piezas y el código. Es la única que lo escribe, y lo ofrece por su API.
+        kinds:
+          - { name: objetivo, describes: "pieza de la solicitud (L0), sin ubicación en el árbol", ubicado: false }
+          - { name: modulo, describes: la definición del paquete o del módulo, ubicado: true }
+          - { name: dominio, describes: "las entidades del dato principal y sus reglas, puras", ubicado: true }
+          - { name: almacen, describes: guardar y cargar el dato principal, ubicado: true }
+          - { name: servicio, describes: "un caso de uso por acción, sobre el dominio y el almacén, sin HTTP", ubicado: true }
+          - { name: api, describes: "la API con que las demás leen el dato; solo traduce peticiones a servicios", ubicado: true }
+          - { name: arranque, describes: el punto de entrada de la aplicación, ubicado: true }
+          - { name: prueba, describes: fichero de prueba, ubicado: true }
+        coRequirements:
+          - { when: servicio, requires: [prueba] }
+        levels: &niveles-simples
+          - id: L0
+            requiredRoles: []
+            title: SOLICITUD
+            instruction: Declara qué tiene que hacer esta aplicación, para quién, y qué datos son suyos.
+          - id: L1
+            requiredRoles: []
+            title: PIEZAS
+            instruction: Propón sus piezas, con la frontera con la otra aplicación a la vista.
+            fanout: { min: 3, max: 16 }
+          - id: L2
+            requiredRoles: []
+            title: IMPLEMENTACIÓN
+            instruction: Escribe el código; lo que habla con la otra aplicación lo hace solo por su API.
+            fanout: { min: 1, max: 60 }
+      - nombre: consumidora
+        description: >-
+          Una aplicación que lee el dato principal por la API de la dueña, en tres peldaños. Se puede cambiar o sustituir sin tocar a la dueña.
+        kinds:
+          - { name: objetivo, describes: "pieza de la solicitud (L0), sin ubicación en el árbol", ubicado: false }
+          - { name: modulo, describes: la definición del paquete o del módulo, ubicado: true }
+          - { name: cliente, describes: el único sitio que llama a la API de la dueña, ubicado: true }
+          - { name: dominio, describes: "lo que la aplicación hace con lo que lee, puro", ubicado: true }
+          - { name: almacen, describes: "lo que guarda por su cuenta, separado del dato principal", ubicado: true }
+          - { name: interfaz, describes: lo que ve quien la usa, ubicado: true }
+          - { name: arranque, describes: el punto de entrada de la aplicación, ubicado: true }
+          - { name: prueba, describes: fichero de prueba, ubicado: true }
+        coRequirements:
+          - { when: cliente, requires: [prueba] }
+        levels: *niveles-simples
+  - nombre: completa
+    aplica: []
+    papeles: *papeles
+    componentes:
+      - nombre: duena
+        description: >-
+          La aplicación dueña del dato principal, en cinco peldaños: lo que se pide, sus piezas, sus contratos, el cableado y el código.
+        kinds:
+          - { name: objetivo, describes: "pieza de la solicitud (L0), sin ubicación en el árbol", ubicado: false }
+          - { name: modulo, describes: la definición del paquete o del módulo, ubicado: true }
+          - { name: dominio, describes: "las entidades del dato principal y sus reglas, puras", ubicado: true }
+          - { name: almacen, describes: guardar y cargar el dato principal, ubicado: true }
+          - { name: servicio, describes: "un caso de uso por acción, sobre el dominio y el almacén, sin HTTP", ubicado: true }
+          - { name: api, describes: "la API con que las demás leen el dato; solo traduce peticiones a servicios", ubicado: true }
+          - { name: arranque, describes: el punto de entrada de la aplicación, ubicado: true }
+          - { name: prueba, describes: fichero de prueba, ubicado: true }
+          - { name: dependencia, describes: "arista del cableado (L3) entre dos piezas declaradas", ubicado: false }
+        coRequirements:
+          - { when: servicio, requires: [prueba] }
+          - { when: almacen, requires: [prueba] }
+        levels: &niveles-completos
+          - id: L0
+            requiredRoles: []
+            title: SOLICITUD
+            instruction: Declara qué tiene que hacer esta aplicación, para quién, y qué datos son suyos.
+          - id: L1
+            requiredRoles: []
+            title: PIEZAS
+            instruction: Propón sus piezas, con la frontera con la otra aplicación a la vista.
+            fanout: { min: 3, max: 20 }
+          - id: L2
+            requiredRoles: []
+            title: CONTRATOS
+            instruction: Declara cada operación de la API (o cada llamada a ella) con lo que recibe, lo que devuelve y sus errores.
+            fanout: { min: 1, max: 40 }
+          - id: L3
+            requiredRoles: []
+            title: CABLEADO
+            instruction: Declara qué depende de qué; nada de una aplicación importa la otra.
+            fanout: { min: 1, max: 50 }
+          - id: L4
+            requiredRoles: []
+            title: IMPLEMENTACIÓN
+            instruction: Escribe el código; lo que habla con la otra aplicación lo hace solo por su API.
+            fanout: { min: 1, max: 90 }
+      - nombre: consumidora
+        description: >-
+          Una aplicación que lee el dato principal por la API de la dueña, en cinco peldaños. Se puede cambiar o sustituir sin tocar a la dueña.
+        kinds:
+          - { name: objetivo, describes: "pieza de la solicitud (L0), sin ubicación en el árbol", ubicado: false }
+          - { name: modulo, describes: la definición del paquete o del módulo, ubicado: true }
+          - { name: cliente, describes: el único sitio que llama a la API de la dueña, ubicado: true }
+          - { name: dominio, describes: "lo que la aplicación hace con lo que lee, puro", ubicado: true }
+          - { name: almacen, describes: "lo que guarda por su cuenta, separado del dato principal", ubicado: true }
+          - { name: interfaz, describes: lo que ve quien la usa, ubicado: true }
+          - { name: arranque, describes: el punto de entrada de la aplicación, ubicado: true }
+          - { name: prueba, describes: fichero de prueba, ubicado: true }
+          - { name: dependencia, describes: "arista del cableado (L3) entre dos piezas declaradas", ubicado: false }
+        coRequirements:
+          - { when: cliente, requires: [prueba] }
+        levels: *niveles-completos
+
+escalones:
+  - nombre: varios-actores
+    cuando:
+      - [actores, '>=', 2]
+    diseno:
+      - Cada actor tiene su vía; mantener el dato se hace del lado de la aplicación dueña, y la que usa el público nunca escribe en él.
+    huecos:
+      - Quién mantiene el dato principal y desde dónde.
+    oficio:
+      - Mantener el dato principal se hace del lado de la dueña; la consumidora nunca escribe en él.
+  - nombre: consumido-por-sistemas
+    cuando:
+      - [consumidores, 'en', [sistemas, ambos]]
+    diseno:
+      - La API de la aplicación dueña es un contrato estable para otros sistemas.
+    huecos:
+      - Qué otros sistemas usan la API, qué pueden hacer con ella y cómo se enteran de un cambio.
+    oficio:
+      - La API es un contrato - respuestas estables, errores con código y mensaje, y cada ruta descrita con un ejemplo.
+    coRequirements:
+      - { when: api, requires: [prueba], componentes: [duena] }
+  - nombre: mucho-volumen
+    cuando:
+      - [volumen, '>=', 1000]
+    oficio:
+      - Con miles de registros nada recorre ni descarga el dato entero en cada petición; los listados se paginan.
+  - nombre: integraciones
+    cuando:
+      - [integraciones, '>=', 1]
+    diseno:
+      - Cada sistema ajeno se usa a través de un solo sitio, que se puede sustituir por un doble para probar.
+    oficio:
+      - Cada llamada a otro sistema tiene un doble para probar sin el sistema real, que cubre el fallo y la demora.
+    coRequirements:
+      - { when: servicio, requires: [prueba] }

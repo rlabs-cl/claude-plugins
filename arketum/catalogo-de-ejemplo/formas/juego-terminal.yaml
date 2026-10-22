@@ -1,0 +1,161 @@
+# Forma de sistema: un juego de una pantalla en la terminal, para una persona,
+# sin datos que guardar.
+#
+# Cambios:
+# - 1.2.0: los papeles de la fase 2 (`implementador` y `revisor`) y las
+#   salidas (`suelo` y `e2e`) en las dos variantes; el contrato de arranque
+#   en el `oficio` del componente.
+# - 1.1.0: variantes (`simple` y `completa`, con el componente `juego`) y el
+#   escalón `varias-pantallas`. Un artefacto con capas declara `stack` y
+#   `componente: juego`; la profundidad la pone la variante.
+name: juego-terminal
+version: 1.2.0
+description: >-
+  Un juego de una pantalla en la terminal, para una persona, sin datos que guardar entre partidas ni otros sistemas.
+orden: 1
+senales:
+  pantallas: numero
+  actores: numero
+  persistencia: booleano
+  integraciones: numero
+  despliegues: numero
+aplica:
+  - [pantallas, '<=', 3]
+  - [actores, '<=', 1]
+  - [persistencia, '==', false]
+  - [integraciones, '==', 0]
+  - [despliegues, '<=', 1]
+diseno:
+  - Un solo programa de una pantalla, sin datos que guardar entre partidas.
+  - La lógica del juego (estado, reglas, puntuación) está separada de cómo se dibuja y de cómo se leen las teclas.
+huecos:
+  - Con qué teclas se juega y cómo se sale.
+  - Cómo empieza y cómo termina una partida, y qué se ve al terminar.
+  - Contra quién o qué se juega y qué lo hace más difícil.
+  - En qué tamaño de pantalla tiene que caber y qué pasa si no cabe.
+
+# De la más simple a la más completa: vale la primera cuyo `aplica` se cumple.
+variantes:
+  - nombre: simple
+    aplica:
+      - [pantallas, '<=', 1]
+    papeles: &papeles
+      - nombre: implementador
+        para_que: construye el sistema en el paso de sistema (el código, sus pruebas y las salidas que exige el paso de evidencia)
+        texto: >-
+          PAPEL: IMPLEMENTADOR (fase 2). Construyes lo acordado, nada más: los requisitos que trae la unidad y los técnicos vigentes, con el oficio del arquetipo.
+          Desciendes cada artefacto tocado nivel a nivel y el código se queda como lo pide su stack; no lo deformas para encajar.
+          Cada funcional que construyes lleva su prueba de extremo a extremo, que arranca el artefacto por su contrato de arranque y lo usa como una persona:
+          una prueba que llama por dentro a una función que el camino real no usa no demuestra nada.
+          Copias las fijaciones del catálogo tal cual y no las editas. Corres tú las pruebas, el suelo y la suite e2e entera, y vinculas cada ejecución
+          a sus requisitos con `satisfies`. No rebajas ni borras una prueba para que pase. Si algo que funcionaba se rompe, lo arreglas;
+          si no puedes, lo reportas con `solicitar` (`pide: defecto`) y decide la persona. Nunca lo escondes.
+      - nombre: revisor
+        para_que: revisa en el paso de evidencia que lo construido funciona por el camino real, antes de entregar la evidencia
+        texto: >-
+          PAPEL: REVISOR (fase 2). No escribes el código: lo revisas como lo usaría la persona. Compruebas que cada funcional construido tiene su prueba e2e,
+          que arranca el artefacto por su contrato de arranque y no lo llama por dentro, y que pasa; que las fijaciones del catálogo no se tocaron;
+          y miras las pruebas modificadas o borradas desde la foto (las lista el resumen del paso): si alguna se rebajó para que pase, lo dices.
+          Corres el suelo y la suite e2e entera con el comando compuesto exacto y entregas esa evidencia. Lo que falla no lo das por bueno:
+          se arregla, o se reporta como defecto con `solicitar` y decide la persona. Si un funcional no admite una prueba automática
+          (un correo, algo visual, una integración externa), lo pides con `solicitar` (`pide: sin_e2e`), con el motivo.
+    salidas: { suelo: true, e2e: true }
+    componentes:
+      - nombre: juego
+        oficio: &oficio
+          - "Arranque: el juego se lanza con `sh arrancar.sh` desde la raíz del artefacto, en una terminal, y juega en ella. Termina limpio con `q`. A una pantalla más pequeña de la que necesita, avisa o sale limpio, sin traza."
+        description: >-
+          El juego entero, en tres peldaños: lo que se pide, sus partes y el código, con la lógica separada de la pantalla.
+        kinds:
+          - { name: objetivo, describes: "pieza de la solicitud (L0), sin ubicación en el árbol", ubicado: false }
+          - { name: modulo, describes: la definición del paquete o del módulo, ubicado: true }
+          - { name: dominio, describes: "el estado, las reglas y la puntuación, sin dibujar ni leer teclas", ubicado: true }
+          - { name: interfaz, describes: cómo se dibuja la pantalla y cómo se leen las teclas, ubicado: true }
+          - { name: arranque, describes: el punto de entrada del programa, ubicado: true }
+          - { name: prueba, describes: fichero de prueba, ubicado: true }
+        coRequirements:
+          - { when: dominio, requires: [prueba] }
+        levels:
+          - id: L0
+            requiredRoles: []
+            title: SOLICITUD
+            instruction: Declara qué juego se quiere, cómo se juega y cómo se gana o se pierde.
+          - id: L1
+            requiredRoles: []
+            title: PARTES
+            instruction: Propón las partes, con la lógica del juego separada de cómo se dibuja y de cómo se leen las teclas.
+            fanout: { min: 2, max: 12 }
+          - id: L2
+            requiredRoles: []
+            title: IMPLEMENTACIÓN
+            instruction: Escribe el código; la lógica se prueba sin terminal.
+            fanout: { min: 1, max: 40 }
+        selfReview:
+          criteria:
+            - check: La lógica del juego se prueba sin abrir la terminal
+              how: Busca en las pruebas del dominio cualquier uso de la pantalla o de las teclas.
+              evidence: medida
+            - check: Lo implementado es el juego que se pidió en L0, y no uno parecido
+              evidence: juicio
+  - nombre: completa
+    aplica: []
+    papeles: *papeles
+    salidas: { suelo: true, e2e: true }
+    componentes:
+      - nombre: juego
+        oficio: *oficio
+        description: >-
+          El juego entero, en cinco peldaños: lo que se pide, sus partes, sus contratos, el cableado y el código.
+        kinds:
+          - { name: objetivo, describes: "pieza de la solicitud (L0), sin ubicación en el árbol", ubicado: false }
+          - { name: modulo, describes: la definición del paquete o del módulo, ubicado: true }
+          - { name: dominio, describes: "el estado, las reglas y la puntuación, sin dibujar ni leer teclas", ubicado: true }
+          - { name: interfaz, describes: cómo se dibuja la pantalla y cómo se leen las teclas, ubicado: true }
+          - { name: arranque, describes: el punto de entrada del programa, ubicado: true }
+          - { name: prueba, describes: fichero de prueba, ubicado: true }
+          - { name: dependencia, describes: "arista del cableado (L3) entre dos piezas declaradas", ubicado: false }
+        coRequirements:
+          - { when: dominio, requires: [prueba] }
+        levels:
+          - id: L0
+            requiredRoles: []
+            title: SOLICITUD
+            instruction: Declara qué juego se quiere, cómo se juega y cómo se gana o se pierde.
+          - id: L1
+            requiredRoles: []
+            title: PARTES
+            instruction: Propón las partes, con la lógica del juego separada de cómo se dibuja y de cómo se leen las teclas.
+            fanout: { min: 2, max: 14 }
+          - id: L2
+            requiredRoles: []
+            title: CONTRATOS
+            instruction: Declara qué ofrece cada parte a las demás, y qué pasa en los bordes (la pantalla pequeña, la tecla que no vale).
+            fanout: { min: 1, max: 30 }
+          - id: L3
+            requiredRoles: []
+            title: CABLEADO
+            instruction: Declara qué depende de qué; la lógica no depende de la pantalla.
+            fanout: { min: 1, max: 40 }
+          - id: L4
+            requiredRoles: []
+            title: IMPLEMENTACIÓN
+            instruction: Escribe el código; la lógica se prueba sin terminal.
+            fanout: { min: 1, max: 70 }
+        selfReview:
+          criteria:
+            - check: La lógica del juego se prueba sin abrir la terminal
+              how: Busca en las pruebas del dominio cualquier uso de la pantalla o de las teclas.
+              evidence: medida
+            - check: Lo implementado es el juego que se pidió en L0, y no uno parecido
+              evidence: juicio
+
+escalones:
+  - nombre: varias-pantallas
+    cuando:
+      - [pantallas, '>=', 2]
+    diseno:
+      - Cada pantalla tiene su propia lectura de teclas; un mismo menú no se copia en varios sitios.
+    huecos:
+      - Cómo se pasa de una pantalla a otra y cómo se vuelve.
+    oficio:
+      - Cada pantalla es una función de la interfaz con su propia lectura de teclas.

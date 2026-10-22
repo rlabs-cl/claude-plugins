@@ -1,0 +1,62 @@
+# Documento de requisitos de producto (PRD).
+#
+# Artefacto de trabajo: vive en la carpeta de la unidad y alimenta al paso de
+# sistema. Lo que pide pasa a ser intención de los artefactos tocados cuando
+# declara cómo se comprueba (`projection`); lo demás queda como prosa.
+name: prd
+version: 1.1.0
+description: >-
+  Requisitos de un cambio de producto: qué se pide, para quién y cómo se sabrá que está hecho. Es el artefacto de trabajo con que empiezan los carriles de producto nuevo y de funcionalidad, y alimenta al paso de sistema. Elígelo para pedir algo; para explicar un fallo corresponde un RCA.
+tags: [proceso, requisitos, producto]
+
+kinds:
+  - name: objetivo
+    describes: "pieza de la solicitud (L0): qué se quiere conseguir y para quién"
+  - name: necesidad
+    describes: un problema o una capacidad que pide quien usa el sistema
+  - name: requisito
+    describes: algo concreto que el sistema tiene que hacer o cumplir; con `projection` si se puede comprobar
+  - name: documento
+    describes: el fichero del PRD, en la carpeta de trabajo del paso
+
+extractors:
+  - mechanism: path
+    kind: documento
+    pattern: "<nombre>.md"
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: SOLICITUD
+    instruction: >
+      Declara qué se quiere conseguir, para quién y por qué ahora. Una pieza por
+      objetivo; un objetivo que no se puede dar por cumplido o no no es un objetivo.
+  - id: L1
+    requiredRoles: []
+    title: NECESIDADES
+    instruction: >
+      Declara las necesidades que atiende cada objetivo: el problema de quien usa
+      el sistema, no la solución.
+    fanout:
+      min: 1
+      max: 15
+  - id: L2
+    requiredRoles: []
+    title: REQUISITOS
+    instruction: >
+      Declara los requisitos de cada necesidad y el fichero del PRD (tipo
+      `documento`, con su `location`). Un requisito que se puede comprobar lleva
+      `projection` (relación y argumentos): es el que pasa a ser intención de los
+      artefactos tocados. Uno sin proyección queda como prosa y no se comprueba.
+      Para que entre en el índice de requisitos del artefacto, lleva los
+      atributos `tipo` (`funcional`, `tecnico` o `decision`) y `requisito` (su id
+      corto, estable entre versiones), con `titulo` (hasta 80 caracteres),
+      `sale_de` (la frase de la persona o el requisito del que se deduce),
+      `porque` (obligatorio en un `tecnico`), `aceptacion` y, si la unidad toca
+      varios artefactos, `artefacto`; la versión la pone Arketum. Con el id de
+      uno que ya existe es una versión nueva de ese requisito. Si contradice a un
+      `tecnico` o a una `decision` del mismo artefacto, lo declara con
+      `choca_con` (su id, `<artefacto>:<id>`).
+    fanout:
+      min: 1
+      max: 60

@@ -1,0 +1,131 @@
+# Documento académico. LaTeX.
+#
+# Declara la forma de un documento que sostiene afirmaciones —una tesis, un
+# artículo, un informe de investigación—, no el contenido de ninguno. No sabe
+# de qué trata.
+#
+# Este arquetipo existe además para probar algo: si la escalera solo sirviera
+# para código, aquí se rompería.
+name: documento-academico
+version: 1.0.0
+description: >-
+  Documento que sostiene afirmaciones con fuentes (tesis, artículo, informe de investigación), en LaTeX. Desciende de la pregunta a la estructura, las afirmaciones y sus dependencias, hasta el manuscrito. Elígelo cuando el artefacto sea prosa que tiene que poder defenderse, no documentación de un sistema.
+tags: [documento, investigacion, latex]
+
+kinds:
+  - name: objetivo
+    describes: "pieza de la solicitud (L0): qué se quiere demostrar"
+  - name: capitulo
+    describes: sección mayor con una tesis propia
+  - name: afirmacion
+    describes: lo que un capítulo sostiene y que puede ser falso
+  - name: figura
+    describes: imagen, diagrama o gráfico
+  - name: pie
+    describes: texto que explica una figura y la hace citable
+  - name: referencia
+    describes: entrada bibliográfica
+  - name: dato
+    describes: fichero de datos que respalda una afirmación
+  - name: dependencia
+    describes: arista del cableado (L3) entre dos piezas declaradas
+  - name: documento
+    describes: fichero de política o de notas
+
+extractors:
+  - mechanism: path
+    kind: capitulo
+    pattern: "capitulos/<nombre>.tex"
+  - mechanism: path
+    kind: figura
+    pattern: "figuras/<nombre>.pdf"
+  - mechanism: path
+    kind: pie
+    pattern: "figuras/<nombre>.tex"
+  - mechanism: path
+    kind: referencia
+    pattern: "bibliografia/<nombre>.bib"
+  - mechanism: path
+    kind: dato
+    pattern: "datos/<nombre>.csv"
+
+# Una figura sin pie no se puede citar ni entender fuera de su página. Es el
+# mismo co-requisito que «implementación necesita prueba», en otro dominio.
+coRequirements:
+  - when: figura
+    requires: [pie]
+    scope: artifact
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: PREGUNTA
+    instruction: >
+      Declara qué se quiere demostrar y ante quién. Una pregunta que no puede
+      responderse «no» no es una pregunta de investigación.
+  - id: L1
+    requiredRoles: [introduccion, desarrollo, conclusion]
+    title: ESTRUCTURA
+    instruction: >
+      Propón la estructura de capítulos y qué cubre cada uno. Todo documento que
+      sostiene algo plantea, desarrolla y concluye; si tu estructura no distingue
+      esas tres funciones, no está estructurada.
+    fanout:
+      min: 3
+      max: 15
+  - id: L2
+    requiredRoles: []
+    title: AFIRMACIONES
+    instruction: >
+      Declara qué afirma cada capítulo y con qué evidencia lo sostiene. Una
+      afirmación que ninguna evidencia puede desmentir no es una afirmación:
+      decláralo si es el caso, en vez de disfrazarla.
+    fanout:
+      min: 1
+      max: 40
+  - id: L3
+    requiredRoles: []
+    title: DEPENDENCIAS
+    instruction: >
+      Declara qué afirmación se apoya en cuál. Si una cadena de apoyos vuelve
+      sobre sí misma, el documento razona en círculo y este nivel es donde se ve.
+    fanout:
+      min: 1
+      max: 50
+  - id: L4
+    requiredRoles: []
+    title: MANUSCRITO
+    instruction: >
+      Escribe el texto. Cada figura viene con su pie y cada afirmación con la
+      referencia o el dato que la sostiene.
+    fanout:
+      min: 1
+      max: 60
+
+# La autorrevisión: qué tiene que comprobar quien entrega, y con qué acción.
+#
+# La escalera comprueba los saltos ENTRE niveles. Nadie comprueba que el
+# manuscrito responda la pregunta que se declaró en L0, porque no hay peldaño
+# anterior contra el que reconciliar. Eso es lo que cierra esta sección.
+selfReview:
+  criteria:
+    - check: Toda cita tiene fuente localizable y la fuente dice lo que se le atribuye
+      how: >
+        Recorre las citas una a una, abre la fuente y contrasta la afirmación con
+        el pasaje. Una fuente que no se pudo abrir cuenta como no comprobada.
+      evidence: medida
+    - check: El formato de referencias es el declarado y es uniforme en todo el documento
+      how: Compara todas las entradas contra el estilo declarado en L1.
+      evidence: medida
+    - check: No hay afirmaciones que se contradigan entre secciones
+      how: >
+        Contrasta cada afirmación de L2 con las demás, en particular las de
+        secciones distintas que hablen del mismo objeto.
+      evidence: juicio
+    - check: La estructura entregada es la que se declaró en L1
+      evidence: juicio
+    - check: El manuscrito responde la pregunta declarada en L0, y no otra
+      evidence: juicio
+  groundingCheck: true
+  groundingScope: alguna fuente, cita, dato o afirmación
+  assumptionsMustDeclare: true

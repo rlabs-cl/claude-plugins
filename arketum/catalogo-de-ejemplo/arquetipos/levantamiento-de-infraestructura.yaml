@@ -1,0 +1,117 @@
+# Levantamiento de infraestructura.
+#
+# Artefacto de trabajo del carril `despliegue`: va en un paso con la marca
+# `pendientes`, lo llevan los papeles de la fase 1 (el analista habla con la
+# persona; el arquitecto deduce lo técnico, propone el modo y redacta los
+# pendientes) y alimenta al paso de sistema y al de evidencia `preparado`.
+# Indaga: dónde se despliega, en qué entornos, con qué accesos y
+# configuraciones, quién opera, hasta dónde se automatiza y cómo se sabe que
+# funciona. No rellena una lista.
+#
+# Lo que no se puede responder en la sesión es un `pendiente` (L1): Arketum
+# genera el cuestionario, la unidad se pausa y las respuestas entran en el
+# último nivel (L2), hijas de su pendiente. El vocabulario de los pendientes
+# (`entorno`, `pendiente`, `respuesta`, `referencia`) es del núcleo.
+name: levantamiento-de-infraestructura
+version: 1.0.0
+description: >-
+  Levantamiento completo de la infraestructura donde se despliega un sistema: alcance y entornos, accesos, configuración, operación, automatización y verificación, con lo que falta como pendientes que la persona trae fuera de la sesión. Termina en el modo de despliegue y en los requisitos técnicos de cada entorno. Elígelo antes de preparar un despliegue; para pedir funcionalidad corresponde un PRD.
+tags: [proceso, despliegue, infraestructura]
+
+kinds:
+  - name: desplegable
+    describes: "alcance (L0): un artefacto del proyecto que se despliega"
+  - name: entorno
+    describes: "alcance (L0): un entorno donde se despliega (`local`, `staging`, `produccion`), con su id como slug y `despliega: si|no` (si esta unidad lo despliega o solo lo prepara)"
+  - name: tema
+    describes: "lo que hay que saber de un entorno (L1), con su rol: `acceso`, `configuracion`, `operacion`, `automatizacion`, `verificacion`, u otro (`red`, `datos`, `coste`, `cumplimiento`, `recuperacion`…)"
+  - name: pendiente
+    describes: "lo que no se puede responder en la sesión (L1): `que`, `porque` (obligatorio), `donde`, `quien`, `respuesta` (`valor`, `referencia` o `confirmacion`) y `antes_de` (`preparar` o `desplegar:<entorno>`)"
+  - name: requisito
+    describes: "lo acordado (L2), como requisito: `tecnico` (con `entorno` el de cada entorno, con `modo` el del modo) o `decision` (con `antes_de: desplegar:<entorno>` la de un pendiente de antes de desplegar)"
+  - name: respuesta
+    describes: "la respuesta a un pendiente de antes de preparar (L2): `de` (el pendiente) y su `valor`, su `referencia` o su `confirmacion`"
+  - name: referencia
+    describes: "dónde vive un secreto que el despliegue necesita (L2): `referencia: <esquema>:<ruta>` y su verificación (`evidence: execution`, `expect: success`, `on: entorno`), o `verificable: no` con su `motivo`"
+  - name: documento
+    describes: el fichero del levantamiento, en la carpeta de trabajo del paso (nunca el cuestionario, que va fuera del repositorio)
+
+extractors:
+  - mechanism: path
+    kind: documento
+    pattern: "<nombre>.md"
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: ALCANCE
+    instruction: >
+      Declara qué se despliega (un `desplegable` por artefacto del proyecto) y en
+      qué entornos (un `entorno` por entorno, con su id como slug: `local`,
+      `staging`, `produccion`). Pregúntale a la persona dónde quiere tenerlo
+      funcionando y quién lo va a usar en cada sitio; no propongas todavía cómo.
+      Cada `entorno` lleva el atributo `despliega`: `si` si esta unidad lo
+      despliega y lo deja funcionando (entonces la unidad lleva el hito
+      `despliegue <entorno>`), `no` si solo lo prepara. Sale de lo que pide la
+      persona, no de lo que te resulte más cómodo: si dice «quiero verla
+      funcionando en mi portátil ya», `local` lleva `despliega: si`. Como mucho
+      un entorno se despliega en una unidad; los demás, en otra.
+  - id: L1
+    requiredRoles: [acceso, configuracion, operacion, automatizacion, verificacion]
+    title: LO QUE HAY QUE SABER
+    instruction: >
+      Indaga cada entorno: cada `entorno` del alcance tiene hijos aquí, y entre
+      todos cubren al menos los roles `acceso` (cuentas, permisos, credenciales:
+      dónde viven), `configuracion` (variables, dominios, puertos, registros de
+      imágenes), `operacion` (quién lo opera, cómo se actualiza, qué pasa si se
+      cae), `automatizacion` (hasta dónde se automatiza y qué despliega cada
+      cual) y `verificacion` (cómo se sabe que funciona después de desplegar).
+      La lista NO está cerrada: pregunta qué más hay (`red`, `datos`, `coste`,
+      `cumplimiento`, `recuperacion`…) y decláralo con su rol. En lo técnico de
+      infraestructura esta instrucción manda sobre el texto del papel: el
+      arquitecto sí nombra tecnologías, puertos, rutas y comandos. Lo que no se
+      puede responder en la sesión (un acceso que hay que pedir, un dato de otro
+      equipo) es un `pendiente`, hijo de su entorno, con `que`, `porque`
+      (obligatorio: para qué hace falta), `donde` (otro equipo, la consola del
+      proveedor, un contrato), `quien` (quién lo trae), `respuesta` (`valor` si
+      es un dato que no es secreto, `referencia` si es dónde vive un secreto,
+      nunca el secreto, o `confirmacion` si es algo hecho) y `antes_de`
+      (`preparar` si sin él no se puede preparar, o `desplegar:<entorno>` si
+      solo hace falta antes de desplegar ese entorno). Al aceptarse este nivel
+      con pendientes, Arketum devuelve el cuestionario.
+    fanout:
+      min: 5
+      max: 40
+  - id: L2
+    requiredRoles: []
+    title: LO ACORDADO
+    instruction: >
+      Declara el alcance acordado como requisitos (atributos `tipo`,
+      `requisito`, `titulo`, `sale_de` —la frase de la persona o el requisito
+      del que se deduce—, `porque` en un `tecnico`, `aceptacion` y `artefacto`:
+      el id del artefacto de despliegue del proyecto, donde viven). Un `tecnico`
+      por entorno con el atributo `entorno` (los entornos del proyecto son los
+      de esos técnicos), y el modo como un `tecnico` con el atributo `modo`
+      (`compose`, `pipeline`, `script` u otro) y su `porque`, que la persona
+      confirma en el gate; los demás técnicos con su `porque` («se automatiza
+      hasta staging», «producción la despliega operaciones con el script»). Las
+      `decision` que siguen abiertas. Una `referencia` por secreto que el
+      despliegue necesita (`referencia: <esquema>:<ruta>`; habituales: `vault`,
+      `aws-sm`, `gcp-sm`, `azure-kv`, `github-secret`, `1password`,
+      `k8s-secret`, `env`), con su verificación —`evidence: execution`,
+      `expect: success` y `on: entorno`: un comando que demuestra el acceso sin
+      imprimir el valor, como `aws sts get-caller-identity` o `gh secret list`
+      filtrado por nombre— o `verificable: no` con su `motivo`. Cada pendiente
+      del nivel anterior tiene aquí su hijo (en `parents`): si es `antes_de:
+      preparar`, una `respuesta` con `de: <pendiente>` y su `valor`, su
+      `referencia` o su `confirmacion`, según lo que pidió; si es
+      `desplegar:<entorno>`, una `decision` con `antes_de:
+      desplegar:<entorno>`, que queda por decidir y bloquea el hito de ese
+      entorno. UNA RESPUESTA `valor` DE LA QUE DEPENDA EL DESPLIEGUE (la región,
+      el dominio, el nombre del registro) SE RECOGE TAMBIÉN EN UN `tecnico`:
+      la `respuesta` no entra en la entrada del paso de sistema, y el técnico
+      sí. Nunca un secreto: Arketum rechaza lo que tenga su forma. Y el
+      fichero del levantamiento (tipo `documento`, con su `location`).
+    fanout:
+      min: 3
+      max: 80

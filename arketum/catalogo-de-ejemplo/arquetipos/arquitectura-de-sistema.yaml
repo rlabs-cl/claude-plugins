@@ -1,0 +1,72 @@
+# Arquitectura del sistema.
+#
+# Su último nivel es una propuesta de proyecto: los artefactos con su raíz, su
+# arquetipo, sus dependencias y lo que se toca con ellos; el andamiaje; y la
+# cobertura. Al aprobarse, fija los tocados (elementos de tipo `artefacto`).
+#
+# Cambios:
+# - 1.1.0: un artefacto declara su arquetipo de una sola capa (`archetype`) o,
+#   con capas, `stack` (con qué se construye) y `componente` (de la variante de
+#   la forma del proyecto); Arketum compone el arquetipo efectivo.
+# - 1.2.0: cada artefacto lleva su juicio de ajuste (`ajuste`, `por_que` y, si
+#   nada calza, `nuevo`): se entrega la mejor alternativa para el caso de uso, no
+#   la que hay a mano (convención `ajuste: obligatorio`).
+name: arquitectura-de-sistema
+version: 1.2.0
+description: >-
+  Propuesta de cómo se parte un sistema en artefactos: raíz, arquetipo, dependencias y `touchWith` de cada uno, el andamiaje y la cobertura. Es el artefacto de trabajo de un producto nuevo y, opcional, de una funcionalidad que añade artefactos. Elígelo para decidir la forma del proyecto, no la de un artefacto.
+tags: [proceso, arquitectura, proyecto]
+
+kinds:
+  - name: objetivo
+    describes: "pieza de la solicitud (L0): qué sistema se quiere y con qué restricciones"
+  - name: componente
+    describes: una responsabilidad del sistema, antes de decidir en qué artefacto vive
+  - name: artefacto
+    describes: "un artefacto del proyecto; id = el del artefacto; atributos `root`, `archetype` (nombre o nombre@versión) o, con capas, `stack` (nombre o nombre@versión) y `componente` (de la variante de la forma del proyecto), `dependsOn` y `touchWith` (ids separados por comas); y el juicio de ajuste: `ajuste` («calza», «calza_con_reservas» o «no_calza»), `por_que` (los elementos del caso de uso que inclinan a esta elección; con reservas, cuáles) y, con «no_calza», `nuevo` (por qué ninguno de los que hay calza y qué tendría el que se agrega)"
+  - name: andamiaje
+    describes: "algo que ningún arquetipo gobierna; atributo `path` (acabado en / para una carpeta)"
+  - name: cobertura
+    describes: "la cobertura del proyecto; atributo `value`: aviso o bloquea"
+  - name: documento
+    describes: el fichero de la arquitectura o un diagrama, en la carpeta de trabajo del paso
+
+extractors:
+  - mechanism: path
+    kind: documento
+    pattern: "<nombre>.md"
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: SOLICITUD
+    instruction: >
+      Declara qué sistema se quiere, para qué y con qué restricciones (equipo,
+      plataforma, plazos).
+  - id: L1
+    requiredRoles: []
+    title: COMPONENTES
+    instruction: >
+      Declara las responsabilidades del sistema y cómo se relacionan, antes de
+      decidir cuántos artefactos hay.
+    fanout:
+      min: 1
+      max: 30
+  - id: L2
+    requiredRoles: []
+    title: PROYECTO
+    instruction: >
+      Declara la propuesta de proyecto: un elemento `artefacto` por artefacto (su
+      id es el del artefacto; atributos `root`, `archetype` —o, con capas,
+      `stack` y `componente`—, `dependsOn` y `touchWith`), un elemento
+      `andamiaje` por ruta que ningún arquetipo
+      gobierna (atributo `path`), un elemento `cobertura` (atributo `value`) y
+      el fichero de la arquitectura (tipo `documento`, con su `location`).
+      Cada `artefacto` lleva su juicio de ajuste: si lo elegido calza con el caso de uso (`ajuste`: calza, calza_con_reservas o no_calza), los elementos del caso que inclinan a esa elección (`por_que`) y, si nada de lo que hay en los catálogos calza, `nuevo`: por qué ninguno calza y qué tendría el que se agrega, con un nombre propio que no exista. Elige la mejor alternativa para el caso de uso, no la que está a mano: crear uno nuevo siempre es una alternativa; si se agrega, Arketum incluye el paso que lo crea y la persona lo aprueba allí.
+    fanout:
+      min: 1
+      max: 60
+
+# El juicio de ajuste de cada artefacto de la propuesta lo exige Arketum al entregar el último nivel.
+conventions:
+  ajuste: obligatorio

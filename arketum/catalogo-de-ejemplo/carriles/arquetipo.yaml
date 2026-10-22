@@ -1,0 +1,13 @@
+# Un arquetipo nuevo: se escribe y se publica en el catálogo que elija la
+# persona.
+name: arquetipo
+version: 1.0.0
+when: Ningún arquetipo de los catálogos describe un tipo de artefacto que se va a construir.
+milestones: [entrega]
+steps:
+  - { id: arquetipo, kind: artifact, archetype: { name: arquetipo-autor }, gate: true }
+  - id: hito
+    kind: milestone
+    gate: true
+    requires:
+      - { id: publicado, describes: la persona confirma que el arquetipo está publicado en el catálogo que eligió, classes: [statement] }
