@@ -1,26 +1,26 @@
 import { createRequire as __crearRequire } from 'node:module'; const require = __crearRequire(import.meta.url);
 import {
-  AQ,
-  AV,
-  AW,
+  AE,
+  AF,
+  AI,
+  AO,
+  AT,
+  AY,
   AZ,
-  B5,
-  Ba,
-  Bf,
+  Az,
   Bg,
+  Bi,
   mJ,
   mL,
   mM,
   mN,
-  mO,
-  zr,
-  zt
-} from "./comun-7HOQALCI.js";
+  mO
+} from "./comun-EUTJM7FK.js";
 
 // arketum/dist/mcp/telemetria-cli.js
 var w = b;
 function a() {
-  const y = ["vgvSzw1LDhldRweGywnLChrHzgeGCgfYysbLC3rHigLUC3rHBgfJACoZBI4", "DxnVoIbHCMTLDhvTihrLBgvTzxrYAweGwY0TywnLChrVihWGls1UBYb8ic0TChjVyMfYxqO", "Aw5ZDgfSywnPB24", "otyYntDNqNb3yMy", "mJeXntyYmfvMv0vItW", "mtyZmJiYmhn2AKjsrW", "ls1UBW", "yxjRzxr1Bsb0zwXLBwv0CMLHia", "AM9PBG", "mtGWAK5wEw9N", "ls1Hy2vWDg8", "C3rYAw5NAwz5", "vgvSzw1LDhldRweGBM8GywnLChrHzge6ihnLigjVCNldSYbSBYbJB250ywrVlcbLBcbPzcbKzsbSysbPBNn0ywXHy2NdS24GEsbSysbZywW7ig5VihnLign1zw50ysbUAsbZzsbLBNBdRweGBMfKys4k", "mJu5otqWmfryqLvqAa", "ndy4mJe2vw1eEfzV", "mZm3mZC2ogzKCvjSvW", "DxjS", "WRSUcG", "ls1WCM9Iyxi", "ovb4rKP4va", "u2uGzw52AwfYW61HigfOB3jHicHSysbWCMLTzxjHigXSyw1HzgeGzguGAg95igXVigvUDSoTysK6", "mJu1mtmZofHZventEG", "tM8GC2uGzw52AwfYW61HigfOB3jHoIa", "yxjRzxr1Bsb0zwXLBwv0CMLHoIbUBYbJB25VEMnVimkR"];
+  const y = ["mtaWC3L6q2To", "mtyYnZKZog9RrvvPAG", "nZm5mduWyLHrDNH4", "mtG3mtCZmg9UDMPfqG", "Aw5JBhvKzxm", "ls1WCM9Iyxi", "tM8GC2uGzw52AwfYW61HigfOB3jHoIa", "BwvZC2fNzq", "Aw5ZDgfSywnPB24", "yxjRzxr1Bsb0zwXLBwv0CMLHoIbUBYbJB25VEMnVimkR", "otaZmMXTuKrICG", "WRSUcG", "mtK2ndi5wxD4t2L5", "iefOB3jHigvZDmoHigfWywDHzgeGzw4Gzxn0ysbTW6fXDwLUysaOyefss0vuvu1Fvevmru1fvfjjqt0WycK6ig5VihnLign1zw50ysbUAsbZzsbLBNBdRweGBMfKysbTAwvUDhjHCYbZAwDHigfZW60U", "mtqZvKn6Avvy", "DxjS", "Dg9ju09tDhjPBMC", "ls1Hy2vWDg8", "yxjRzxr1Bsb0zwXLBwv0CMLHia", "mZu0mJf4vMXsEwS", "DxnVoIbHCMTLDhvTihrLBgvTzxrYAweGwY0TywnLChrVihWGls1UBYb8ic0TChjVyMfYxqO", "lIbfC3rVigvZigXVihf1zsbZzsbLBNzPyxldRwe6", "vgvSzw1LDhldRweGywnLChrHzgeGCgfYysbLC3rHigLUC3rHBgfJACoZBI4", "mJyXBNnVBNzA", "mMjVuNzLwq", "ls1UBW", "mti4mZy0nNfju1fNtW", "C3rYAw5NAwz5", "DgvYBwLUywW"];
   a = function() {
     return y;
   };
@@ -30,19 +30,20 @@ function a() {
   const v = b, g = e();
   while (!![]) {
     try {
-      const h = parseInt(v(278)) / 1 + parseInt(v(293)) / 2 + -parseInt(v(285)) / 3 + -parseInt(v(292)) / 4 + parseInt(v(277)) / 5 + parseInt(v(273)) / 6 * (-parseInt(v(291)) / 7) + parseInt(v(279)) / 8 * (parseInt(v(283)) / 9);
+      const h = -parseInt(v(158)) / 1 * (parseInt(v(170)) / 2) + -parseInt(v(165)) / 3 * (-parseInt(v(175)) / 4) + -parseInt(v(178)) / 5 + -parseInt(v(176)) / 6 + -parseInt(v(172)) / 7 + -parseInt(v(156)) / 8 * (parseInt(v(169)) / 9) + -parseInt(v(177)) / 10 * (-parseInt(v(160)) / 11);
       if (h === f) break;
       else g["push"](g["shift"]());
     } catch (i) {
       g["push"](g["shift"]());
     }
   }
-})(a, 434046);
+})(a, 197723);
+var c = w(166);
 function b(c2, d2) {
-  c2 = c2 - 271;
+  c2 = c2 - 153;
   const e = a();
   let f = e[c2];
-  if (b["LDVINn"] === void 0) {
+  if (b["UsQgqu"] === void 0) {
     var g = function(l) {
       const m = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=";
       let n = "", o = "";
@@ -54,27 +55,26 @@ function b(c2, d2) {
       }
       return decodeURIComponent(o);
     };
-    b["OSSMKX"] = g, b["CiwhoR"] = {}, b["LDVINn"] = !![];
+    b["mrlOFj"] = g, b["mQnaQD"] = {}, b["UsQgqu"] = !![];
   }
-  const h = e[0], i = c2 + h, j = b["CiwhoR"][i];
-  return !j ? (f = b["OSSMKX"](f), b["CiwhoR"][i] = f) : f = j, f;
+  const h = e[0], i = c2 + h, j = b["mQnaQD"][i];
+  return !j ? (f = b["mrlOFj"](f), b["mQnaQD"][i] = f) : f = j, f;
 }
-var c = w(289);
 async function d(e, f = /* @__PURE__ */ new Date()) {
   const x = w, [g, ...h] = e;
-  if (h["length"] > 0 || g !== void 0 && !["--acepto", "--no", x(282)]["includes"](g)) return { "salida": x(287) + e[x(272)](" ") + x(281) + c, "codigo": 2 };
-  if (g === x(274) || g === x(294)) {
-    const p = g === x(274);
-    return await Ba(p, x(271) + g, zt(await zr()), "terminal"), { "salida": p ? x(288) + (AQ() ? " Ahora est\xE1 apagada en esta m\xE1quina (`ARKETUM_TELEMETRIA=0`): no se cuenta ni se env\xEDa nada mientras siga as\xED." : "") + "\n" : x(276), "codigo": 0 };
+  if (h["length"] > 0 || g !== void 0 && !["--acepto", x(171), x(180)][x(179)](g)) return { "salida": x(155) + e["join"](" ") + x(157) + c, "codigo": 2 };
+  if (g === x(163) || g === x(171)) {
+    const p = g === "--acepto";
+    return await AT(p, x(164) + g, Bi(await Bg()), x(174)), { "salida": p ? x(168) + (Az() ? x(159) : "") + "\n" : "Telemetr\xEDa no aceptada: se borr\xF3 lo contado, el id de la instalaci\xF3n y la sal; no se cuenta ni se env\xEDa nada.\n", "codigo": 0 };
   }
-  const i = await B5(), j = AZ(), k = AW(f), l = Bf(i, k);
-  if (g === "--probar") {
-    const q = mM(i, { "apagada": AQ(), "destino": j });
+  const i = await AO(), j = AI(), k = AF(f), l = AY(i, k);
+  if (g === x(180)) {
+    const q = mM(i, { "apagada": Az(), "destino": j });
     if (q !== void 0) return { "salida": mO({ "razon": q }) + "\n", "codigo": 1 };
-    const s = JSON[x(275)](mJ(l, j, { "instalacion": i[x(290)], "momento": f["toISOString"]() })), t = await AV()(j[x(280)], s)["catch"]((u) => ({ "ok": ![], "error": u["message"] }));
+    const s = JSON[x(173)](mJ(l, j, { "instalacion": i[x(154)], "momento": f[x(162)]() })), t = await AE()(j[x(161)], s)["catch"]((u) => ({ "ok": ![], "error": u[x(153)] }));
     return { "salida": mO(t) + "\n", "codigo": t["ok"] ? 0 : 1 };
   }
-  const m = mN(i, { "apagada": AQ(), "destino": j, "hoy": k }), n = m === void 0 ? x(284) : x(286) + mL(m) + ". Esto es lo que se enviar\xEDa:", o = j === void 0 ? JSON["stringify"](l) : Bg(l, j, i, f["toISOString"]());
+  const m = mN(i, { "apagada": Az(), "destino": j, "hoy": k }), n = m === void 0 ? "Se enviar\xEDa ahora (la primera llamada de hoy lo env\xEDa):" : x(181) + mL(m) + x(167), o = j === void 0 ? JSON["stringify"](l) : AZ(l, j, i, f["toISOString"]());
   return { "salida": n + "\n" + o + "\n", "codigo": 0 };
 }
 export {
