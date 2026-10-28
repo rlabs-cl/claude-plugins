@@ -1,0 +1,11 @@
+# The names of the clients that Arketum reads or writes by function: the code in src/ does not write them. Across
+# several catalogs, each list is the union of theirs, in order.
+#
+# - instructions: the instruction files generated for the agents, at the project root, all with the same text
+#   (`action: instructions`); the status warns if the existing one is no longer the one that would be generated.
+# - config: the configuration folders of editors and agents that the tool creates just by opening the folder: at the
+#   root, they do not count when classifying the start and are proposed as scaffolding.
+# - scaffolding: the minimal scaffolding the start proposes, besides the instruction files.
+instructions: [AGENTS.md, CLAUDE.md]
+config: [.claude/, .vscode/, .idea/, .cursor/]
+scaffolding: [.git/, node_modules/, dist/]

@@ -1,0 +1,227 @@
+# A service that depends on another system. Go.
+#
+# Declares the shape of a service with external boundaries (a gateway, a
+# synchronizer, a webhook with retries), not that of any of them. It does not
+# know what it integrates with.
+#
+# The policy of this archetype is a single idea: EVERY BOUNDARY IS DECLARED AND
+# CAN BE SUBSTITUTED. What cannot be substituted cannot be tested, and what
+# cannot be tested is where integrated systems fall.
+#
+# A test lives next to what it tests (`x_test.go`): each code extractor excludes
+# it, so that only `test` claims it.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `servicio-con-integracion` 1.x.
+name: integrated-service
+version: 2.0.0
+language: en
+replaces: [servicio-con-integracion]
+description:
+  en: >-
+    A service that depends on other systems (gateway, synchronizer, webhook with retries), in Go. Every external boundary is declared as a port and has a substitutable double to test it. Choose it when integrating is the core of the artifact; for a web app with its own persistence there are others.
+  es: >-
+    Servicio que depende de otros sistemas (pasarela, sincronizador, webhook con reintentos), en Go. Toda frontera externa se declara como puerto y tiene un doble sustituible para probarla. Elígelo cuando lo central del artefacto sea integrarse; para una web con persistencia propia hay otros.
+tags:
+  - { en: code, es: código }
+  - { en: service, es: servicio }
+  - { en: integration, es: integración }
+  - { en: go, es: go }
+
+kinds:
+  - name: goal
+    describes:
+      en: piece of the request (L0), with no location in the tree
+      es: pieza de la solicitud (L0), sin ubicación en el árbol
+  - name: boundary
+    describes:
+      en: interface that describes a foreign system as this one needs it
+      es: interfaz que describe un sistema ajeno tal como este lo necesita
+  - name: adapter
+    describes:
+      en: implementation of a boundary against the real system
+      es: implementación de una frontera contra el sistema real
+  - name: double
+    describes:
+      en: implementation of a boundary to test without the real system
+      es: implementación de una frontera para probar sin el sistema real
+  - name: service
+    describes:
+      en: own logic, which talks to nobody outside
+      es: lógica propia, que no habla con nadie de fuera
+  - name: dependency
+    describes:
+      en: wiring edge (L3) between two declared pieces
+      es: arista del cableado (L3) entre dos piezas declaradas
+  - name: test
+    describes:
+      en: test file
+      es: fichero de prueba
+  - name: module
+    describes:
+      en: the Go module definition and its sums (go.mod, go.sum)
+      es: la definición del módulo de Go y sus sumas (go.mod, go.sum)
+  - name: entrypoint
+    describes:
+      en: the entry point of a binary (cmd/<binary>/main.go)
+      es: el punto de entrada de un binario (cmd/<binary>/main.go)
+  - name: document
+    describes:
+      en: documentation or policy file
+      es: fichero de documentación o de política
+
+extractors:
+  - mechanism: path
+    kind: boundary
+    pattern: "internal/boundaries/<name>.go"
+    excluding: ["internal/boundaries/<name>_test.go"]
+  - mechanism: path
+    kind: adapter
+    pattern: "internal/adapters/<name>.go"
+    excluding: ["internal/adapters/<name>_test.go"]
+  - mechanism: path
+    kind: double
+    pattern: "internal/doubles/<name>.go"
+    excluding: ["internal/doubles/<name>_test.go"]
+  - mechanism: path
+    kind: service
+    pattern: "internal/services/<name>.go"
+    excluding: ["internal/services/<name>_test.go"]
+  - mechanism: path
+    kind: test
+    pattern: "internal/<package>/<name>_test.go"
+  # go.mod and go.sum: one extractor per kind, and the marker matches half a word.
+  - mechanism: path
+    kind: module
+    pattern: "go.<file>"
+  - mechanism: path
+    kind: entrypoint
+    pattern: "cmd/<binary>/main.go"
+
+# An adapter without a double is a boundary that can only be exercised against
+# the real system: the test becomes slow, fragile and ends up disabled.
+coRequirements:
+  - when: adapter
+    requires: [double]
+    scope: artifact
+  - when: service
+    requires: [test]
+    scope: artifact
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: { en: REQUEST, es: SOLICITUD }
+    instruction:
+      en: >
+        Declare what the service has to achieve and which foreign systems it
+        needs to talk to in order to achieve it. Name the systems; not how they
+        are called inside.
+      es: >
+        Declara qué tiene que conseguir el servicio y con qué sistemas ajenos
+        necesita hablar para conseguirlo. Nombra los sistemas; no cómo se les
+        llama por dentro.
+  - id: L1
+    requiredRoles: [boundaries, adapters, services]
+    title: { en: PARTS, es: PARTES }
+    instruction:
+      en: >
+        Propose the parts, separating what is yours from what belongs to someone
+        else. A piece that mixes its own logic with a call to a foreign system
+        cannot be tested without that system, and this level exists to prevent
+        it.
+      es: >
+        Propón las partes, separando lo que es tuyo de lo que es de otro. Una
+        pieza que mezcle lógica propia con una llamada a un sistema ajeno no
+        podrá probarse sin ese sistema, y este nivel existe para impedirlo.
+    fanout:
+      min: 3
+      max: 14
+  - id: L2
+    requiredRoles: []
+    title: { en: CONTRACTS, es: CONTRATOS }
+    instruction:
+      en: >
+        Declare each boundary as YOUR service needs it, not as the provider
+        documents it. And declare what happens when the foreign system fails,
+        is slow or answers something you did not expect: that is part of the
+        contract too.
+      es: >
+        Declara cada frontera tal como TU servicio la necesita, no como la
+        documenta el proveedor. Y declara qué pasa cuando el sistema ajeno falla,
+        tarda o responde algo que no esperabas: eso también es el contrato.
+    fanout:
+      min: 1
+      max: 30
+  - id: L3
+    requiredRoles: []
+    title: { en: WIRING, es: CABLEADO }
+    instruction:
+      en: >
+        Declare what depends on what, and in particular which piece depends on
+        which boundary. No piece of your own logic should depend on an adapter:
+        if it does, the boundary is not doing its job.
+      es: >
+        Declara qué depende de qué, y en particular qué pieza depende de qué
+        frontera. Ninguna pieza de lógica propia debería depender de un adaptador:
+        si lo hace, la frontera no está haciendo su trabajo.
+    fanout:
+      min: 1
+      max: 40
+  - id: L4
+    requiredRoles: []
+    title: { en: IMPLEMENTATION, es: IMPLEMENTACIÓN }
+    instruction:
+      en: >
+        Write the code. Every adapter comes with its double, and your own logic
+        is tested without bringing up anything outside.
+      es: >
+        Escribe el código. Cada adaptador viene con su doble, y la lógica propia
+        se prueba sin levantar nada de fuera.
+    fanout:
+      min: 1
+      max: 70
+
+# The self-review: what to check in the delivered service, and with which action.
+selfReview:
+  criteria:
+    - check:
+        en: Unit test coverage of your own code is at least 80%
+        es: La cobertura de pruebas unitarias del código propio es al menos del 80%
+      how:
+        en: Run the suite with a coverage report and read the line total.
+        es: Corre la suite con reporte de cobertura y lee el total de líneas.
+      evidence: measured
+    - check:
+        en: There are no OWASP Top 10 findings in what is delivered
+        es: No hay hallazgos de OWASP Top 10 en lo entregado
+      how:
+        en: >
+          Review unvalidated input, authentication and access control, secrets
+          in the tree, and what gets logged of what comes from outside.
+        es: >
+          Revisa entrada sin validar, autenticación y control de acceso, secretos
+          en el árbol, y qué se registra de lo que llega de fuera.
+      evidence: measured
+    - check:
+        en: No piece of your own logic depends on an adapter
+        es: Ninguna pieza de lógica propia depende de un adaptador
+      how:
+        en: Follow the dependencies declared in L3 from each service.
+        es: Sigue las dependencias declaradas en L3 desde cada servicio.
+      evidence: measured
+    - check:
+        en: Every boundary declared in L2 has a double, and the double covers failure and delay
+        es: Cada frontera declarada en L2 tiene doble, y el doble cubre el fallo y la demora
+      how:
+        en: Compare the list of boundaries against the list of doubles, and read each double.
+        es: Contrasta la lista de fronteras contra la de dobles, y lee cada doble.
+      evidence: measured
+    - check:
+        en: What is implemented fulfills the intent declared in L0, and not a similar one
+        es: Lo implementado cumple la intención declarada en L0, y no una parecida
+      evidence: judgment
+  groundingCheck: true
+  groundingScope:
+    en: any api, module, class, function or datum
+    es: alguna api, módulo, clase, función o dato
+  assumptionsMustDeclare: true

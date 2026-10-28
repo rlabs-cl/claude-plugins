@@ -3,10 +3,10 @@ import { createRequire as __crearRequire } from 'node:module'; const require = _
 
 // arketum/dist/mcp/arketum.js
 function b(c2, d2) {
-  c2 = c2 - 366;
+  c2 = c2 - 300;
   var e = a();
   var f = e[c2];
-  if (b["CddwPd"] === void 0) {
+  if (b["GFCYTR"] === void 0) {
     var g = function(l) {
       var m2 = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=";
       var n = "", o = "";
@@ -18,40 +18,40 @@ function b(c2, d2) {
       }
       return decodeURIComponent(o);
     };
-    b["AgVJsP"] = g, b["bgaqfc"] = {}, b["CddwPd"] = !![];
+    b["HXqOVx"] = g, b["ViWFnx"] = {}, b["GFCYTR"] = !![];
   }
-  var h = e[0], i = c2 + h, j = b["bgaqfc"][i];
-  return !j ? (f = b["AgVJsP"](f), b["bgaqfc"][i] = f) : f = j, f;
+  var h = e[0], i = c2 + h, j = b["ViWFnx"][i];
+  return !j ? (f = b["HXqOVx"](f), b["ViWFnx"][i] = f) : f = j, f;
 }
 var m = b;
-function a() {
-  var n = ["nZi4mtyZofLwCe1vva", "yxjNDG", "D3jPDgu", "DxnVoIbHCMTLDhvTicHLBcbZzxj2AwrVCIbnq1aGCg9Yihn0zgLVksb8igfYA2v0Dw0Gy2KGphjHW616pIa8Dw5PzgfKpUkaPIb8igfYA2v0Dw0GCgfUzwWGw3jHW616xsbBls1WDwvYDg8GtL0GFcbHCMTLDhvTihbHBMvSic0TC2vYDMLKB3iGFcbHCMTLDhvTihbHBMvSic0Tzgv0zw5LCIb8igfYA2v0Dw0GDgvSzw1LDhjPysbBls1Hy2vWDg8GFcaTlw5VihWGls1WCM9IyxjDcG", "nZqYndCWtLHWwNDh", "ndi5nfDkCKvsDq", "nw5fteP2rW", "mtK1mta3mMT3y1P0Ca", "mJD3qvnbAfK", "n3rJs3vKDq", "mJK1ndK3nLrdD21XyW", "C2XPy2u", "ls1OzwXW", "mJyWmtyWyvLpufbi", "DgvSzw1LDhjPyq", "CgfUzwW", "mZq1ndyYm1LTCxnUEq"];
-  a = function() {
-    return n;
-  };
-  return a();
-}
 (function(g, h) {
   var l = b, i = g();
   while (!![]) {
     try {
-      var j = -parseInt(l(380)) / 1 * (-parseInt(l(376)) / 2) + parseInt(l(370)) / 3 + parseInt(l(367)) / 4 + -parseInt(l(377)) / 5 * (-parseInt(l(381)) / 6) + -parseInt(l(371)) / 7 + parseInt(l(378)) / 8 + -parseInt(l(379)) / 9 * (parseInt(l(375)) / 10);
+      var j = parseInt(l(314)) / 1 + -parseInt(l(311)) / 2 + parseInt(l(318)) / 3 + -parseInt(l(309)) / 4 + parseInt(l(300)) / 5 + parseInt(l(301)) / 6 * (parseInt(l(302)) / 7) + -parseInt(l(308)) / 8;
       if (j === h) break;
       else i["push"](i["shift"]());
     } catch (k) {
       i["push"](i["shift"]());
     }
   }
-})(a, 705015);
-var c = m(374);
-var d = process["argv"][2];
-if (d === void 0) await import("./cli.js");
+})(a, 331746);
+var c = "usage: arketum (the MCP server over stdio) | arketum ci <root> <unit>\u2026 | arketum panel [root] [--port N] | arketum panel --server | arketum panel --stop | arketum telemetry [--accept | --no | --test]\n";
+var d = process[m(313)][2];
+function a() {
+  var n = ["mJy4nJqWoe1KCvD1Bq", "mJu0nZmWnhjvBNnhCq", "ls1OzwXW", "nJqWnJC2Dgvdr0zX", "C3bSAwnL", "yxjNDG", "ndq1mdK2D2fur3jK", "lI9JAs1JBgKUANm", "zxHPDenVzgu", "yxjRzxr1BtOGDw5RBM93BIbJB21Tyw5KimkR", "mtaWodm5m2z4wLnQvq", "lI9Wyw5LBc1JBgKUANm", "lI9JBgKUANm", "mJa2mJyXnwPMBNDuCq", "mJu4ntC2nLrHB3DUta", "n2vptMr1uG", "C2fSAwrH", "D3jPDgu", "C3rKB3v0", "C3rKzxjY", "WRSUcG"];
+  a = function() {
+    return n;
+  };
+  return a();
+}
+if (d === void 0) await import(m(320));
 else {
-  if (d === "ci" || d === m(369)) process["argv"]["splice"](2, 1), await (d === "ci" ? import("./ci-cli.js") : import("./panel-cli.js"));
+  if (d === "ci" || d === "panel") process[m(313)][m(312)](2, 1), await (d === "ci" ? import(m(315)) : import(m(319)));
   else {
-    if (d === m(368)) {
-      const { ordenTelemetria: e } = await import("./telemetria-cli.js"), f = await e(process[m(372)][m(382)](3));
-      process["stdout"][m(373)](f["salida"]), process["exitCode"] = f["codigo"];
-    } else process["stderr"][m(373)](d === m(366) || d === "-h" ? c : "arketum: no conozco \xAB" + d + "\xBB.\n" + c), process["exitCode"] = d === "--help" || d === "-h" ? 0 : 2;
+    if (d === "telemetry" || d === "telemetria") {
+      const { ordenTelemetria: e } = await import("./telemetria-cli.js"), f = await e(process[m(313)]["slice"](3), /* @__PURE__ */ new Date(), d);
+      process[m(305)][m(304)](f[m(303)]), process["exitCode"] = f["codigo"];
+    } else process[m(306)]["write"](d === "--help" || d === "-h" ? c : m(317) + d + m(307) + c), process[m(316)] = d === m(310) || d === "-h" ? 0 : 2;
   }
 }

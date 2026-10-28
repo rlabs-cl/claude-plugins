@@ -11,8 +11,12 @@
 # - 1.2.0: cada artefacto lleva su juicio de ajuste (`ajuste`, `por_que` y, si
 #   nada calza, `nuevo`): se entrega la mejor alternativa para el caso de uso, no
 #   la que hay a mano (convención `ajuste: obligatorio`).
+# - 1.3.0: si la persona trajo con qué construirlo (el `rumbo` del
+#   levantamiento), cada artefacto dice si lo honra (`rumbo: honra`) o se aparta
+#   (`rumbo: se_aparta`, con su respuesta en `eleccion`): apartarse lo elige
+#   ella (convención `rumbo: obligatorio`).
 name: arquitectura-de-sistema
-version: 1.2.0
+version: 1.3.0
 description: >-
   Propuesta de cómo se parte un sistema en artefactos: raíz, arquetipo, dependencias y `touchWith` de cada uno, el andamiaje y la cobertura. Es el artefacto de trabajo de un producto nuevo y, opcional, de una funcionalidad que añade artefactos. Elígelo para decidir la forma del proyecto, no la de un artefacto.
 tags: [proceso, arquitectura, proyecto]
@@ -23,7 +27,7 @@ kinds:
   - name: componente
     describes: una responsabilidad del sistema, antes de decidir en qué artefacto vive
   - name: artefacto
-    describes: "un artefacto del proyecto; id = el del artefacto; atributos `root`, `archetype` (nombre o nombre@versión) o, con capas, `stack` (nombre o nombre@versión) y `componente` (de la variante de la forma del proyecto), `dependsOn` y `touchWith` (ids separados por comas); y el juicio de ajuste: `ajuste` («calza», «calza_con_reservas» o «no_calza»), `por_que` (los elementos del caso de uso que inclinan a esta elección; con reservas, cuáles) y, con «no_calza», `nuevo` (por qué ninguno de los que hay calza y qué tendría el que se agrega)"
+    describes: "un artefacto del proyecto; id = el del artefacto; atributos `root`, `archetype` (nombre o nombre@versión) o, con capas, `stack` (nombre o nombre@versión) y `componente` (de la variante de la forma del proyecto), `dependsOn` y `touchWith` (ids separados por comas); y el juicio de ajuste: `ajuste` («calza», «calza_con_reservas» o «no_calza»), `por_que` (los elementos del caso de uso que inclinan a esta elección; con reservas, cuáles) y, con «no_calza», `nuevo` (por qué ninguno de los que hay calza y qué tendría el que se agrega); si la persona trajo con qué construirlo, `rumbo` («honra» o «se_aparta») y, si se aparta, `eleccion` (su respuesta, literal)"
   - name: andamiaje
     describes: "algo que ningún arquetipo gobierna; atributo `path` (acabado en / para una carpeta)"
   - name: cobertura
@@ -62,11 +66,13 @@ levels:
       `andamiaje` por ruta que ningún arquetipo
       gobierna (atributo `path`), un elemento `cobertura` (atributo `value`) y
       el fichero de la arquitectura (tipo `documento`, con su `location`).
-      Cada `artefacto` lleva su juicio de ajuste: si lo elegido calza con el caso de uso (`ajuste`: calza, calza_con_reservas o no_calza), los elementos del caso que inclinan a esa elección (`por_que`) y, si nada de lo que hay en los catálogos calza, `nuevo`: por qué ninguno calza y qué tendría el que se agrega, con un nombre propio que no exista. Elige la mejor alternativa para el caso de uso, no la que está a mano: crear uno nuevo siempre es una alternativa; si se agrega, Arketum incluye el paso que lo crea y la persona lo aprueba allí.
+      Cada `artefacto` lleva su juicio de ajuste: si lo elegido calza con el caso de uso (`ajuste`: calza, calza_con_reservas o no_calza), los elementos del caso que inclinan a esa elección (`por_que`) y, si nada de lo que hay en los catálogos calza, `nuevo`: por qué ninguno calza y qué tendría el que se agrega, con un nombre propio que no exista. Elige la mejor alternativa para el caso de uso, no la que está a mano: crear uno nuevo siempre es una alternativa; si se agrega, Arketum incluye el paso que lo crea y la persona lo aprueba allí. Si la persona trajo con qué construirlo, cada `artefacto` dice si lo elegido lo honra (`rumbo: honra`) o se aparta (`rumbo: se_aparta`): apartarse lo elige ella, y su respuesta va en `eleccion`; sin ella, Arketum te da la pregunta.
     fanout:
       min: 1
       max: 60
 
-# El juicio de ajuste de cada artefacto de la propuesta lo exige Arketum al entregar el último nivel.
+# El juicio de ajuste de cada artefacto de la propuesta lo exige Arketum al entregar el último nivel, y
+# también si honra el stack que trajo la persona, cuando lo trajo.
 conventions:
   ajuste: obligatorio
+  rumbo: obligatorio

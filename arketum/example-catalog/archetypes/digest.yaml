@@ -1,0 +1,149 @@
+# Digesting code that already exists.
+#
+# Its last level is the project's base structure: the artifacts (with their stack and component, or their archetype),
+# the shape with its signals (each with the tree paths that support it), the scaffolding and the coverage. Arketum adds
+# to each level's guide what it computes from the tree: the candidate roots (from the stacks' root locations), how well
+# each stack fits, and what stays outside. Arketum derives the variant and the tiers from the signals. Each artifact
+# and the shape carry their fit judgment (conventions `fit` and `shapeFit`, both required).
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `digestion` 1.x.
+name: digest
+version: 2.0.0
+language: en
+replaces: [digestion]
+description:
+  en: >-
+    Digesting code that already exists: from what is in the tree to the Arketum base structure (artifacts, shape with its signals, scaffolding and coverage), without changing code or inferring requirements. It is the working artifact of the `digest` lane.
+  es: >-
+    Digestión de un código que ya existe: de lo que hay en el árbol a la estructura base de Arketum (artefactos, forma con sus señales, andamiaje y cobertura), sin cambiar código ni inferir requisitos. Es el artefacto de trabajo del carril `digest`.
+tags:
+  - { en: process, es: proceso }
+  - { en: digest, es: digestion }
+  - { en: project, es: proyecto }
+
+kinds:
+  - name: root
+    describes:
+      en: "a candidate root of the tree (L0); attribute `path`"
+      es: "una raíz candidata del árbol (L0); atributo `path`"
+  - name: outside
+    describes:
+      en: "a group of paths that falls under no candidate root (L0); attribute `path`"
+      es: "un grupo de rutas que no cae en ninguna raíz candidata (L0); atributo `path`"
+  - name: decision
+    describes:
+      en: "what a root or a group is (L1): an artifact with layers (`stack` and `component`), a single-layer one (`archetype`), or scaffolding"
+      es: "qué es una raíz o un grupo (L1): un artefacto con capas (`stack` y `component`), uno de una sola capa (`archetype`) o andamiaje"
+  - name: artifact
+    describes:
+      en: >-
+        an artifact of the project (L2); id = the artifact's id; attributes `root`, `archetype` (name or name@version) or, with layers, `stack` and `component`, `dependsOn` and `touchWith` (ids separated by commas); and the fit judgment: `fit` (`fits`, `fits_with_caveats` or `does_not_fit`), `why` (the elements of the use case that tip toward this choice; with caveats, which ones) and, with `does_not_fit`, `new` (why none of the existing ones fits and what the one being added would have)
+      es: >-
+        un artefacto del proyecto (L2); id = el del artefacto; atributos `root`, `archetype` (nombre o nombre@versión) o, con capas, `stack` y `component`, `dependsOn` y `touchWith` (ids separados por comas); y el juicio de ajuste: `fit` (`fits`, `fits_with_caveats` o `does_not_fit`), `why` (los elementos del caso de uso que inclinan a esta elección; con reservas, cuáles) y, con `does_not_fit`, `new` (por qué ninguno de los que hay calza y qué tendría el que se agrega)
+  - name: scaffolding
+    describes:
+      en: "something no archetype governs (L2); attribute `path` (ending in / for a folder)"
+      es: "algo que ningún arquetipo gobierna (L2); atributo `path` (acabado en / para una carpeta)"
+  - name: coverage
+    describes:
+      en: "the project's coverage (L2); attribute `value`: `warning` or `blocking`"
+      es: "la cobertura del proyecto (L2); atributo `value`: `warning` o `blocking`"
+  - name: shape
+    describes:
+      en: >-
+        the system shape (L2); attribute `name`, its fit judgment (`fit`: `fits`, when it meets its `applies`, or `fits_with_caveats`, with what is being forced; and `why`, what in the tree tips toward it) and, if it does not meet its `applies` without caveats, `reason`; if it does not meet its `applies`, `choice`: what the person answered about forcing it or creating a new one; Arketum derives the variant and the tiers (if you declare them, `variant` and `tiers`, they have to match; if no variant applies, `variantReason`)
+      es: >-
+        la forma de sistema (L2); atributo `name`, su juicio de ajuste (`fit`: `fits`, que cumple su `applies`, o `fits_with_caveats`, con lo que se fuerza; y `why`, lo que en el árbol inclina a ella) y, si no cumple su `applies` sin reservas, `reason`; si no cumple su `applies`, `choice`: lo que respondió la persona a forzarla o crear una nueva; la variante y los escalones los deriva Arketum (si los declaras, `variant` y `tiers`, tienen que casar; si ninguna variante aplica, `variantReason`)
+  - name: signal
+    describes:
+      en: "a signal of the shape (L2); id = the signal; attributes `value` (with its type), `because` and `paths` (tree paths that support it, separated by commas)"
+      es: "una señal de la forma (L2); id = la señal; atributos `value` (con su tipo), `because` y `paths` (rutas del árbol que la sostienen, separadas por comas)"
+  - name: retire
+    describes:
+      en: "in a project with artifacts, one that leaves `proyecto.yaml` (L2); id = the artifact (with no root, no live unit and no live requirements)"
+      es: "en un proyecto con artefactos, uno que sale de `proyecto.yaml` (L2); id = el artefacto (sin raíz, sin unidad viva y sin requisitos vivos)"
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: { en: ROOTS, es: RAÍCES }
+    instruction:
+      en: >
+        Read the tree (paths, not contents) and what Arketum computes from it in this
+        guide. Declare one `root` element for each root you are going to propose
+        (attribute `path`; `.` is the project root) and one `outside` element for
+        each group of paths that falls under none (attribute `path`).
+      es: >
+        Lee el árbol (rutas, no contenidos) y lo que Arketum calcula de él en esta
+        guía. Declara un elemento `root` por cada raíz que vayas a proponer
+        (atributo `path`; `.` es la raíz del proyecto) y un elemento `outside` por
+        cada grupo de rutas que no cae en ninguna (atributo `path`).
+    fanout:
+      min: 1
+      max: 40
+  - id: L1
+    requiredRoles: []
+    title: { en: STACKS, es: STACKS }
+    instruction:
+      en: >
+        For each root and each outside group, one `decision` element (with its parent
+        in L0): with layers, `stack` and `component` (the stack that fits best is not
+        mandatory, but what you leave unclaimed shows up at the gate); single-layer,
+        `archetype`; or `scaffolding`. Read just enough of the code to decide the
+        system's shape: how many deployments, screens, actors and integrations,
+        and which paths show it.
+      es: >
+        Por cada raíz y cada grupo de fuera, un elemento `decision` (con su padre
+        en L0): con capas, `stack` y `component` (el stack con más encaje no es
+        obligatorio, pero lo que dejas sin reclamar sale en el gate); de una sola
+        capa, `archetype`; o `scaffolding`. Lee del código lo justo para decidir la
+        forma del sistema: cuántos despliegues, pantallas, actores e integraciones,
+        y qué rutas lo muestran.
+    fanout:
+      min: 1
+      max: 40
+  - id: L2
+    requiredRoles: []
+    title: { en: BASE STRUCTURE, es: ESTRUCTURA BASE }
+    instruction:
+      en: >
+        Declare the base structure, each element with its parent in L1: one
+        `artifact` per artifact (attributes `root` and `stack` and `component`, or
+        `archetype`; `dependsOn` and `touchWith` if needed), one `scaffolding` per
+        path nobody governs (attribute `path`), one `coverage` (`warning` on
+        code that already exists), the `shape` (attribute `name`) and one `signal` for
+        each signal of the shape, with `value`, `because` and `paths` (the tree paths
+        that support it). What you leave outside every root and the scaffolding is not
+        rejected: it shows up at the gate as what stays outside (it will be
+        `fuera_de_raiz` drift), and the person decides case by case.
+        Arketum derives the variant and the tiers from the signals. In a
+        project with artifacts, `retire` the ones that no longer have a root. Do not declare
+        requirements: seeding them is another unit.
+        The `shape` also carries its fit judgment (`fit` and `why`): a digest does not create shapes; if none fits, one is created first with the `archetype` lane, or the code is digested with caveats. If the closest one does not meet its `applies`, forcing it is the person's choice, not yours: Arketum gives you the question, and their answer goes in the `choice` attribute of the `shape`.
+        Each `artifact` carries its fit judgment: whether the choice fits the use case (`fit`: `fits`, `fits_with_caveats` or `does_not_fit`), the elements of the case that tip toward that choice (`why`) and, if nothing in the catalogs fits, `new`: why none fits and what the one being added would have, with a name of its own that does not exist yet. Choose the best alternative for the use case, not the one at hand: creating a new one is always an alternative; if one is added, Arketum includes the step that creates it and the person approves it there.
+      es: >
+        Declara la estructura base, cada elemento con su padre en L1: un
+        `artifact` por artefacto (atributos `root` y `stack` y `component`, o
+        `archetype`; `dependsOn` y `touchWith` si hacen falta), un `scaffolding` por
+        ruta que no gobierna nadie (atributo `path`), una `coverage` (`warning` sobre
+        un código que ya existe), la `shape` (atributo `name`) y una `signal` por
+        cada señal de la forma, con `value`, `because` y `paths` (las rutas del árbol
+        que la sostienen). Lo que dejes fuera de toda raíz y del andamiaje no se
+        rechaza: sale en el gate como lo que queda fuera (será deriva
+        `fuera_de_raiz`), y la persona decide caso a caso.
+        La variante y los escalones los deriva Arketum de las señales. En un
+        proyecto con artefactos, `retire` los que ya no tienen raíz. No declares
+        requisitos: sembrarlos es otra unidad.
+        La `shape` lleva también su juicio de ajuste (`fit` y `why`): una digestión no crea formas; si ninguna calza, se crea antes con el carril `archetype`, o se digiere con reservas. Si la más cercana no cumple su `applies`, forzarla lo elige la persona, no tú: Arketum te da la pregunta, y su respuesta va en el atributo `choice` de la `shape`.
+        Cada `artifact` lleva su juicio de ajuste: si lo elegido calza con el caso de uso (`fit`: `fits`, `fits_with_caveats` o `does_not_fit`), los elementos del caso que inclinan a esa elección (`why`) y, si nada de lo que hay en los catálogos calza, `new`: por qué ninguno calza y qué tendría el que se agrega, con un nombre propio que no exista. Elige la mejor alternativa para el caso de uso, no la que está a mano: crear uno nuevo siempre es una alternativa; si se agrega, Arketum incluye el paso que lo crea y la persona lo aprueba allí.
+    # One element per artifact and per scaffolding, the coverage, the shape, its signals (up to seven in the example
+    # catalog) and what is retired: 120 leaves room for a monorepo of about a hundred pieces without splitting the digest.
+    fanout:
+      min: 1
+      max: 120
+
+# Arketum requires the fit judgment of each artifact in the base structure, and that of the shape, when the last level
+# is delivered.
+conventions:
+  fit: required
+  shapeFit: required

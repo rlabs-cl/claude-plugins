@@ -1,0 +1,42 @@
+# Deploying is part of the guided work. Before preparing the deployment there is a full infrastructure survey (which may
+# stay pending: Arketum generates the questionnaire and it is answered outside the repository); the mode is chosen
+# after understanding; the deployment is an artifact of the system (`compose-deployment` in this catalog), and the
+# person meets the milestone by confirming it was deployed and ran.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `despliegue` 1.x.
+name: deploy
+version: 2.0.0
+language: en
+replaces: [despliegue]
+when:
+  en: Deploy an existing system for the first time, to a new environment, or change what was agreed for an environment.
+  es: Desplegar un sistema que existe por primera vez, en un entorno nuevo, o cambiar lo acordado de un entorno.
+milestones: [deployment]
+steps:
+  # The infrastructure survey: the roles of phase 1, with the level instruction up front in technical matters.
+  - { id: infrastructure, kind: artifact, archetype: { name: infrastructure-survey }, gate: true, pending: true, feeds: [system, ready] }
+  # Adds the deployment artifact to the project if it does not exist yet.
+  - { id: architecture, kind: artifact, archetype: { name: system-architecture }, optional: true, gate: true }
+  # Publishes the archetype of a mode that is not in the catalogs (pipeline, script...).
+  - { id: archetype, kind: artifact, archetype: { name: archetype-author }, optional: true, gate: true }
+  - { id: system, kind: system, fedBy: [infrastructure] }
+  - id: ready
+    kind: evidence
+    fedBy: [infrastructure]
+    # Also, the verification of each verifiable reference of the survey (`on: environment`).
+    requires:
+      - id: validation
+        describes:
+          en: the dry-run validation of the deployment definition (for compose, `docker compose -f deploy/compose.yaml config --quiet`)
+          es: la validación en seco de la definición del despliegue (en el compose, `docker compose -f deploy/compose.yaml config --quiet`)
+        classes: [execution]
+        expect: success
+        on: change
+  - id: milestone
+    kind: milestone
+    optional: true
+    gate: true
+    # The deployment milestone of an environment: it requires the person's confirmation through the interactive channel
+    # ("was it deployed to <env> and did it run?", yes or no); a run or a CI report are optional backing. It is not
+    # completed while a decision due before deploying that environment is still open.
+    confirmation: true

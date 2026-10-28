@@ -1,0 +1,101 @@
+# Product requirements document (PRD).
+#
+# A working artifact: it lives in the unit's folder and feeds the `system` step. What it asks for becomes intent of
+# the touched artifacts when it declares how it is checked (`projection`); the rest stays as prose.
+#
+# 2.0.0: the example catalog in English, bilingual.
+name: prd
+version: 2.0.0
+language: en
+description:
+  en: >-
+    Requirements for a product change: what is asked for, for whom, and how we will know it is done. It is the working artifact the `new` and `feature` lanes start with, and it feeds the `system` step. Choose it to ask for something; to explain a failure, an RCA is the right one.
+  es: >-
+    Requisitos de un cambio de producto: qué se pide, para quién y cómo se sabrá que está hecho. Es el artefacto de trabajo con que empiezan los carriles `new` y `feature`, y alimenta al paso `system`. Elígelo para pedir algo; para explicar un fallo corresponde un RCA.
+tags:
+  - { en: process, es: proceso }
+  - { en: requirements, es: requisitos }
+  - { en: product, es: producto }
+
+kinds:
+  - name: goal
+    describes:
+      en: "a piece of the request (L0): what is to be achieved and for whom"
+      es: "pieza de la solicitud (L0): qué se quiere conseguir y para quién"
+  - name: need
+    describes:
+      en: a problem or a capability asked for by the people who use the system
+      es: un problema o una capacidad que pide quien usa el sistema
+  - name: requirement
+    describes:
+      en: something concrete the system has to do or meet; with `projection` if it can be checked
+      es: algo concreto que el sistema tiene que hacer o cumplir; con `projection` si se puede comprobar
+  - name: document
+    describes:
+      en: the PRD file, in the step's working folder
+      es: el fichero del PRD, en la carpeta de trabajo del paso
+
+extractors:
+  - mechanism: path
+    kind: document
+    pattern: "<name>.md"
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: { en: REQUEST, es: SOLICITUD }
+    instruction:
+      en: >
+        Declare what is to be achieved, for whom, and why now. One piece per
+        goal; a goal that cannot be judged as met or not met is not a goal.
+      es: >
+        Declara qué se quiere conseguir, para quién y por qué ahora. Una pieza por
+        objetivo; un objetivo que no se puede dar por cumplido o no no es un objetivo.
+  - id: L1
+    requiredRoles: []
+    title: { en: NEEDS, es: NECESIDADES }
+    instruction:
+      en: >
+        Declare the needs each goal serves: the problem of the people who use
+        the system, not the solution.
+      es: >
+        Declara las necesidades que atiende cada objetivo: el problema de quien usa
+        el sistema, no la solución.
+    fanout:
+      min: 1
+      max: 15
+  - id: L2
+    requiredRoles: []
+    title: { en: REQUIREMENTS, es: REQUISITOS }
+    instruction:
+      en: >
+        Declare the requirements of each need and the PRD file (type
+        `document`, with its `location`). A requirement that can be checked carries
+        `projection` (relation and arguments): it is the one that becomes intent of
+        the touched artifacts. One without a projection stays as prose and is not checked.
+        To enter the artifact's requirement index, it carries the attributes
+        `type` (`functional`, `technical` or `decision`) and `requirement` (its short
+        id, stable across versions), with `title` (up to 80 characters),
+        `comesFrom` (the person's sentence, or the requirement it is deduced from),
+        `because` (mandatory in a `technical` one), `acceptance` and, if the unit touches
+        several artifacts, `artifact`; Arketum sets the version. With the id of
+        an existing one, it is a new version of that requirement. If it contradicts a
+        `technical` or a `decision` of the same artifact, it declares so with
+        `clashesWith` (its id, `<artifact>:<id>`).
+      es: >
+        Declara los requisitos de cada necesidad y el fichero del PRD (tipo
+        `document`, con su `location`). Un requisito que se puede comprobar lleva
+        `projection` (relación y argumentos): es el que pasa a ser intención de los
+        artefactos tocados. Uno sin proyección queda como prosa y no se comprueba.
+        Para que entre en el índice de requisitos del artefacto, lleva los
+        atributos `type` (`functional`, `technical` o `decision`) y `requirement` (su id
+        corto, estable entre versiones), con `title` (hasta 80 caracteres),
+        `comesFrom` (la frase de la persona o el requisito del que se deduce),
+        `because` (obligatorio en un `technical`), `acceptance` y, si la unidad toca
+        varios artefactos, `artifact`; la versión la pone Arketum. Con el id de
+        uno que ya existe es una versión nueva de ese requisito. Si contradice a un
+        `technical` o a una `decision` del mismo artefacto, lo declara con
+        `clashesWith` (su id, `<artifact>:<id>`).
+    fanout:
+      min: 1
+      max: 60

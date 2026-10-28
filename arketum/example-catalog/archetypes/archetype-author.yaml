@@ -1,0 +1,105 @@
+# Authoring an archetype.
+#
+# The archetype being written is a YAML file in the working folder; the descent reaches it. When the step is approved,
+# Arketum publishes it in the catalog the person chooses; the milestone of the `archetype` lane confirms it. It also
+# writes stacks (`stacks/<name>.yaml`) and system shapes (`shapes/<name>.yaml`), several candidates in one step.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `arquetipo-autor` 1.x.
+name: archetype-author
+version: 2.0.0
+language: en
+replaces: [arquetipo-autor]
+description:
+  en: >-
+    Writing a new archetype: for which type of artifact, with which element types, extractors and levels, down to the YAML file that declares it. It is the working artifact of the `archetype` lane and, optionally, of the `new` and `feature` lanes. Choose it when no archetype in the catalogs describes what is going to be built.
+  es: >-
+    Escritura de un arquetipo nuevo: para qué tipo de artefacto, con qué tipos de elemento, extractores y niveles, hasta el fichero YAML que lo declara. Es el artefacto de trabajo del carril `archetype` y, opcional, de los carriles `new` y `feature`. Elígelo cuando ningún arquetipo de los catálogos describe lo que se va a construir.
+tags:
+  - { en: process, es: proceso }
+  - { en: archetype, es: arquetipo }
+  - { en: policy, es: politica }
+
+kinds:
+  - name: goal
+    describes:
+      en: "a piece of the request (L0): which type of artifact the archetype describes"
+      es: "pieza de la solicitud (L0): qué tipo de artefacto describe el arquetipo"
+  - name: shape
+    describes:
+      en: an element type, an extractor or a level of the ladder that the archetype declares
+      es: un tipo de elemento, un extractor o un nivel de la escalera que el arquetipo declara
+  - name: archetype
+    describes:
+      en: the archetype's YAML file, in the step's working folder
+      es: el fichero YAML del arquetipo, en la carpeta de trabajo del paso
+  - name: stack
+    describes:
+      en: "the YAML file of a stack (what it is built with), in `stacks/` of the step's working folder"
+      es: "el fichero YAML de un stack (con qué se construye), en `stacks/` de la carpeta de trabajo del paso"
+  - name: system_shape
+    describes:
+      en: "the YAML file of a system shape (signals, `applies`, design, gaps, variants and tiers), in `shapes/` of the step's working folder"
+      es: "el fichero YAML de una forma de sistema (señales, `applies`, diseño, huecos, variantes y escalones), en `shapes/` de la carpeta de trabajo del paso"
+
+extractors:
+  - mechanism: path
+    kind: archetype
+    pattern: "<name>.yaml"
+  - mechanism: path
+    kind: stack
+    pattern: "stacks/<name>.yaml"
+  - mechanism: path
+    kind: system_shape
+    pattern: "shapes/<name>.yaml"
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: { en: REQUEST, es: SOLICITUD }
+    instruction:
+      en: >
+        Declare which type of artifact the archetype will describe and why none of
+        the catalogs serves.
+      es: >
+        Declara qué tipo de artefacto describirá el arquetipo y por qué ninguno de
+        los catálogos sirve.
+  - id: L1
+    requiredRoles: []
+    title: { en: SHAPE, es: FORMA }
+    instruction:
+      en: >
+        Declare the shape: element types, how each one is recognized in the tree
+        (extractors), and the levels of the ladder with their instruction.
+      es: >
+        Declara la forma: tipos de elemento, cómo se reconoce cada uno en el árbol
+        (extractores) y los niveles de la escalera con su instrucción.
+    fanout:
+      min: 1
+      max: 40
+  - id: L2
+    requiredRoles: []
+    title: { en: ARCHETYPE, es: ARQUETIPO }
+    instruction:
+      en: >
+        Declare the archetype's file (type `archetype`, with `location` pointing to a
+        YAML file in the working folder) or a stack's (type `stack`, with
+        `location` pointing to `stacks/<name>.yaml`). It has to load, its `name` is a slug,
+        and the file is named `<name>.yaml`. If the architecture adds several,
+        one for each. If the elicitation chose a new system shape
+        (`does_not_fit`), also declare its file (type `system_shape`, with
+        `location` pointing to `shapes/<name>.yaml`), with signals that its `applies` meets,
+        and, if its variants ask for floor or e2e, a stack with the fixtures for
+        that shape.
+      es: >
+        Declara el fichero del arquetipo (tipo `archetype`, con `location` a un
+        YAML de la carpeta de trabajo) o el de un stack (tipo `stack`, con
+        `location` a `stacks/<name>.yaml`). Tiene que cargar, su `name` es un slug
+        y el fichero se llama `<name>.yaml`. Si la arquitectura agrega varios,
+        uno por cada uno. Si el levantamiento eligió una forma de sistema nueva
+        (`does_not_fit`), declara también su fichero (tipo `system_shape`, con
+        `location` a `shapes/<name>.yaml`), con señales que su `applies` cumple,
+        y, si sus variantes piden suelo o e2e, un stack con las fijaciones de
+        esa forma.
+    fanout:
+      min: 1
+      max: 20

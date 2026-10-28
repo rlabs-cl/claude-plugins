@@ -1,5 +1,5 @@
 ---
-description: Da la dirección del panel de estado de Arketum de este proyecto
+description: Gives the address of this project's Arketum status panel
 ---
 
-Llama a la herramienta `build` de Arketum con `root` (la carpeta de este proyecto, ruta absoluta) y `action: panel`. Si dice que el panel no corre, corre lo que indica. Después dale a la persona la dirección del panel, tal cual.
+Call Arketum's `build` tool with `root` (this project's folder, absolute path) and `action: panel`. If it says the panel is not running, run what it indicates. Then give the person the panel's address, as is.

@@ -1,0 +1,42 @@
+# A feature in a system that exists: it is asked for (PRD), bounded (blast radius) and built in the touched artifacts,
+# with acceptance and no regressions. The blast radius and the optional architecture are process gates
+# (`gate: process`): a delegation from the person approves them; what gets built (the PRD) and the milestone stay hers.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `funcionalidad` 1.x.
+name: feature
+version: 2.0.0
+language: en
+replaces: [funcionalidad]
+when:
+  en: Add or change a feature of a system that already exists.
+  es: Añadir o cambiar una funcionalidad de un sistema que ya existe.
+milestones: [deployment, delivery, execution]
+steps:
+  - { id: prd, kind: artifact, archetype: { name: prd }, gate: true, elicitation: true, feeds: [system] }
+  - { id: blast-radius, kind: artifact, archetype: { name: blast-radius }, gate: process, feeds: [system] }
+  - { id: architecture, kind: artifact, archetype: { name: system-architecture }, optional: true, gate: process }
+  - { id: archetype, kind: artifact, archetype: { name: archetype-author }, optional: true, gate: true }
+  - { id: system, kind: system, fedBy: [prd, blast-radius] }
+  - id: acceptance
+    # Besides its own, the outputs of each touched artifact whose effective archetype asks for them: the floor and the
+    # whole e2e suite, with their composed commands.
+    outputs: true
+    kind: evidence
+    requires:
+      - id: acceptance
+        describes: { en: the feature does what the PRD asks for, es: la funcionalidad hace lo que pide el PRD }
+        classes: [execution]
+        expect: success
+      - id: no-regression
+        describes: { en: what already worked still works, es: lo que ya funcionaba sigue funcionando }
+        classes: [execution]
+        expect: success
+  - id: milestone
+    kind: milestone
+    optional: true
+    gate: true
+    confirmation: true
+    requires:
+      - id: met
+        describes: { en: the person confirms the milestone was met, es: la persona confirma que el hito se cumplió }
+        classes: [statement]

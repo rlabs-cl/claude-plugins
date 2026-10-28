@@ -1,0 +1,80 @@
+# Stack: Go.
+#
+# Each package lives in `internal/`, with its tests `<name>_test.go` next to what they test; each code location
+# excludes them, so that only `test` claims them. The fixtures (the floors and the e2e helper over a terminal,
+# black-box, in Python) are copied into `arketum/fixtures/<name>/`.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `go` 1.x (same name).
+name: go
+version: 2.0.0
+language: en
+description:
+  en: >-
+    Go: one module per artifact, with its packages in `internal/` and the tests `<name>_test.go` next to the code; `go.mod` and `go.sum` as the module, `cmd/<binary>/main.go` and `start.sh` as the entrypoint, and the end-to-end tests, black-box, in `tests/e2e/`.
+  es: >-
+    Go: un módulo por artefacto, con sus paquetes en `internal/` y las pruebas `<name>_test.go` junto al código; `go.mod` y `go.sum` como módulo, `cmd/<binary>/main.go` y `start.sh` como arranque, y las pruebas de extremo a extremo, de caja negra, en `tests/e2e/`.
+
+locations:
+  module: { pattern: "go.<file>" }
+  domain: { pattern: "internal/domain/<name>.go", excluding: ["internal/domain/<name>_test.go"] }
+  storage: { pattern: "internal/storage/<name>.go", excluding: ["internal/storage/<name>_test.go"] }
+  service: { pattern: "internal/services/<name>.go", excluding: ["internal/services/<name>_test.go"] }
+  interface: { pattern: "internal/interface/<name>.go", excluding: ["internal/interface/<name>_test.go"] }
+  api: { pattern: "internal/api/<name>.go", excluding: ["internal/api/<name>_test.go"] }
+  client: { pattern: "internal/clients/<name>.go", excluding: ["internal/clients/<name>_test.go"] }
+  entrypoint: { pattern: ["cmd/<binary>/main.go", "start.sh"] }
+  test: { pattern: ["internal/<package>/<name>_test.go", "tests/e2e/<name>.py"] }
+
+samples:
+  module: [go.mod, go.sum]
+  domain: [internal/domain/order.go]
+  storage: [internal/storage/sqlite.go]
+  service: [internal/services/orders.go]
+  interface: [internal/interface/web.go]
+  api: [internal/api/routes.go]
+  client: [internal/clients/catalog.go]
+  entrypoint: [cmd/shop/main.go, start.sh]
+  test: [internal/services/orders_test.go, internal/domain/order_test.go, tests/e2e/test_game.py, tests/e2e/conftest.py]
+
+# What the e2e tests and the fixtures generate: they are Python.
+generated: [__pycache__/, .pytest_cache/]
+
+craft:
+  - en: Every boundary with another system is an interface that the service declares as it needs it, with a double to test without the real system.
+    es: Toda frontera con otro sistema es una interfaz que el servicio declara tal como la necesita, con un doble para probar sin el sistema real.
+  - en: 'Errors are returned and wrapped with context (`fmt.Errorf("…: %w", err)`); they are never ignored nor turned into a `panic`.'
+    es: 'Los errores se devuelven y se envuelven con contexto (`fmt.Errorf("…: %w", err)`); nunca se ignoran ni se convierten en `panic`.'
+  - en: No package in `internal/` imports `cmd/`; the wiring lives in `cmd/<binary>/main.go`.
+    es: Ningún paquete de `internal/` importa `cmd/`; el cableado vive en `cmd/<binary>/main.go`.
+  - en: The context (`context.Context`) travels as the first parameter in whatever talks to the outside.
+    es: El contexto (`context.Context`) viaja como primer parámetro en lo que habla con fuera.
+  - en: '`start.sh` builds and launches the binary (`go run ./cmd/<binary> "$@"`, or the binary already built): it is what the floor and the e2e tests launch.'
+    es: '`start.sh` compila y lanza el binario (`go run ./cmd/<binary> "$@"`, o el binario ya construido): es lo que lanzan el suelo y las pruebas e2e.'
+  - en: The e2e tests (`tests/e2e/`, black-box, with pytest) start the program with the `app` (or `game`) launcher of the e2e fixture and use it through the terminal, like a person. The fixtures need `python3` with `pyte` and `pytest` (`python3 -m pip install -r arketum/fixtures/e2e/requirements.txt`), which belong to the tests, not to the product.
+    es: Las pruebas e2e (`tests/e2e/`, de caja negra, con pytest) arrancan el programa con el lanzador `app` (o `game`) de la fijación e2e y lo usan por la terminal, como una persona. Las fijaciones necesitan `python3` con `pyte` y `pytest` (`python3 -m pip install -r arketum/fixtures/e2e/requirements.txt`), que son de las pruebas, no del producto.
+
+# Fixed by the catalog: copied as they are into `arketum/fixtures/<name>/` of the artifact and never edited (the
+# closing compares their checksum).
+fixtures:
+  - { from: stacks/go/floor-terminal-game, name: floor, for: floor, shapes: [terminal-game] }
+  - { from: stacks/go/floor-layered-app, name: floor, for: floor, shapes: [layered-app] }
+  - { from: stacks/go/e2e-terminal, name: e2e, for: e2e, shapes: [terminal-game, layered-app] }
+
+# The arguments with which its e2e test runner (pytest, through the black-box e2e helper) runs none: a run of the e2e
+# suite with one of them does not count as e2e.
+notRun: [--co, --collect-only, --collectonly, --trace-config, --help, -h, --version, -V, --fixtures, --fixtures-per-test, --markers, --setup-plan, --setup-only]
+
+commands:
+  tests: go test ./...
+  floor: python3 -B arketum/fixtures/floor/floor.py .
+  e2e: PYTHONPATH=arketum/fixtures/e2e python3 -B -m pytest -q -c arketum/fixtures/e2e/pytest.ini --rootdir=. tests/e2e
+
+selfReview:
+  criteria:
+    - check:
+        en: The test coverage of the own code is at least 80%
+        es: La cobertura de pruebas del código propio es al menos del 80%
+      how:
+        en: Run `go test -cover ./...` and read the total.
+        es: Corre `go test -cover ./...` y lee el total.
+      evidence: measured

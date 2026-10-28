@@ -1,0 +1,18 @@
+# Digesting code that already exists: propose its base structure (the artifacts with their stack and their component or
+# their archetype, the shape with its variant and its tiers, the scaffolding and the coverage), which the person
+# confirms at the gate. Once approved, Arketum writes it to the project file without fixing touched artifacts or
+# changing code; it does not infer functional requirements. In a project that already has artifacts, it legalizes what
+# is outside what was declared (and retires artifacts with no root, no live unit and no requirements).
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `digestion` 1.x.
+name: digest
+version: 2.0.0
+language: en
+replaces: [digestion]
+when:
+  en: Existing code without the base structure of Arketum, or what is outside what was declared in a project that already has it.
+  es: Un código que ya existe sin la estructura base de Arketum, o lo que está fuera de lo declarado en un proyecto que ya la tiene.
+milestones: []
+steps:
+  - { id: digest, kind: artifact, archetype: { name: digest }, gate: true, digest: true }
+  - { id: archetype, kind: artifact, archetype: { name: archetype-author }, optional: true, gate: true }

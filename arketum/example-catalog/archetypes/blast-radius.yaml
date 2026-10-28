@@ -1,0 +1,215 @@
+# The blast radius of a change.
+#
+# It declares the shape of a claim almost nobody writes and that everything else depends on: WHAT A CHANGE CAN TOUCH.
+# Not what it touched: what it can touch. It serves two processes with the same shape and a different source: in a
+# migration the source is the dependency graph; in a regulatory requirement, the regulation.
+#
+# The rule this archetype exists to enforce: "bounded" is not declared by whoever made the change, and when the radius
+# cannot be bounded, the change is MASSIVE by definition. The boundary is declared with evidence, just like what is
+# reached, because the boundary is the risky claim, not the list.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `radio-de-alcance` 1.x.
+name: blast-radius
+version: 2.0.0
+language: en
+replaces: [radio-de-alcance]
+description:
+  en: >-
+    Analysis of what a change CAN touch before making it: sources, what is reached, boundaries with evidence, and certifications. It is a working artifact of the `feature` lane and of migrations. Choose it to bound a change; to explain a failure that already happened, an RCA is the right one.
+  es: >-
+    Análisis de lo que PUEDE tocar un cambio antes de hacerlo: fuentes, alcanzados, fronteras con evidencia y certificaciones. Es un artefacto de trabajo del carril `feature` y de las migraciones. Elígelo para acotar un cambio; para explicar un fallo ya ocurrido corresponde un RCA.
+tags:
+  - { en: process, es: proceso }
+  - { en: impact, es: impacto }
+  - { en: analysis, es: analisis }
+
+kinds:
+  - name: goal
+    describes:
+      en: "a piece of the request (L0): which change is bounded and who declares it"
+      es: "pieza de la solicitud (L0): qué cambio se acota y quién lo declara"
+  - name: source
+    describes:
+      en: where the scope comes from (dependency graph, regulation, contract)
+      es: de dónde sale el alcance — grafo de dependencias, norma, contrato
+  - name: reached
+    describes:
+      en: something the change can touch
+      es: algo que el cambio puede tocar
+  - name: boundary
+    describes:
+      en: something declared OUTSIDE the radius, with the reason it stays outside
+      es: algo que se declara FUERA del radio, con la razón por la que queda fuera
+  - name: evidence
+    describes:
+      en: what supports that something is inside or outside
+      es: lo que sostiene que algo está dentro o fuera
+  - name: certification
+    describes:
+      en: a current certification that falls inside the radius and has to be verified again
+      es: certificación vigente que cae dentro del radio y hay que reverificar
+  - name: dependency
+    describes:
+      en: an edge of the wiring (L3) between two declared pieces
+      es: arista del cableado (L3) entre dos piezas declaradas
+  - name: document
+    describes:
+      en: a notes or policy file
+      es: fichero de notas o de política
+
+extractors:
+  - mechanism: path
+    kind: source
+    pattern: "sources/<name>.md"
+  - mechanism: path
+    kind: reached
+    pattern: "reached/<name>.md"
+  - mechanism: path
+    kind: boundary
+    pattern: "boundaries/<name>.md"
+  - mechanism: path
+    kind: evidence
+    pattern: "evidence/<name>.md"
+  - mechanism: path
+    kind: certification
+    pattern: "certifications/<name>.md"
+  - mechanism: path
+    kind: document
+    pattern: "<name>.md"
+
+# What is reached and the boundary weigh the same. A boundary without evidence is how a radius gets declared bounded
+# without being so.
+coRequirements:
+  - when: reached
+    requires: [evidence]
+    scope: artifact
+  - when: boundary
+    requires: [evidence]
+    scope: artifact
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: { en: CHANGE, es: CAMBIO }
+    instruction:
+      en: >
+        Declare what changed, who made it, and WHO DECLARES THIS RADIUS, which
+        cannot be whoever made the change. Also declare what it is bounded against: a
+        dependency graph, a regulation, a contract.
+      es: >
+        Declara qué cambió, quién lo hizo, y QUIÉN DECLARA ESTE RADIO — que no
+        puede ser quien hizo el cambio. Declara también contra qué se acota: un
+        grafo de dependencias, una norma, un contrato.
+  - id: L1
+    requiredRoles: [sources, freshness]
+    title: { en: SOURCES, es: FUENTES }
+    instruction:
+      en: >
+        Declare where the scope comes from and WHEN that source was measured. A source
+        with known drift (an index refreshed hourly, a graph whose failure queue
+        grows silently) produces a short radius, and a short radius
+        produces a short recertification that gets signed all the same. If you cannot
+        establish the freshness, say so here: it is what turns the radius massive.
+      es: >
+        Declara de dónde sale el alcance y CUÁNDO se midió esa fuente. Una fuente
+        con deriva conocida —un índice que se refresca por hora, un grafo cuya cola
+        de fallos crece en silencio— produce un radio corto, y un radio corto
+        produce una recertificación corta que se firma igual. Si no puedes
+        establecer la frescura, dilo aquí: es lo que convierte el radio en masivo.
+    fanout:
+      min: 1
+      max: 10
+  - id: L2
+    requiredRoles: [direct, indirect, boundaries]
+    title: { en: SCOPE, es: ALCANCE }
+    instruction:
+      en: >
+        Declare what the change can touch: what uses it directly, what is reached
+        transitively, and what stays OUTSIDE. All three. A radius without declared
+        boundaries is not bounded: it is unexamined.
+      es: >
+        Declara qué puede tocar el cambio: lo que lo usa directamente, lo que llega
+        por transitividad, y lo que queda FUERA. Las tres. Un radio sin fronteras
+        declaradas no está acotado: está sin mirar.
+    fanout:
+      min: 3
+      max: 80
+  - id: L3
+    requiredRoles: []
+    title: { en: CERTIFICATIONS, es: CERTIFICACIONES }
+    instruction:
+      en: >
+        Which current certifications fall inside the radius. Remember that a
+        certification dies from two causes and only one leaves a trace: the
+        artifact changed, or the criterion changed. No commit triggers the second.
+      es: >
+        Qué certificaciones vigentes caen dentro del radio. Recuerda que una
+        certificación muere por dos causas y solo una deja rastro: cambió el
+        artefacto, o cambió el criterio. La segunda no la dispara ningún commit.
+    fanout:
+      min: 0
+      max: 60
+  - id: L4
+    requiredRoles: []
+    title: { en: RADIUS, es: RADIO }
+    instruction:
+      en: >
+        Write the verdict: BOUNDED or MASSIVE, and what has to be verified again. If it is
+        bounded, declare what is taken as good without testing again. If you could not
+        bound it, it is massive, and massive means everything that was attempted, without sampling.
+        Also declare the radius file (type `document`, with its `location`):
+        it is what fidelity compares in this last level.
+      es: >
+        Escribe el veredicto: ACOTADO o MASIVO, y qué hay que reverificar. Si es
+        acotado, declara qué se da por bueno sin volver a probar. Si no pudiste
+        acotar, es masivo — y masivo significa todo lo que se intentó, sin muestreo.
+        Declara también el fichero del radio (tipo `document`, con su `location`):
+        es lo que la fidelidad compara en este último nivel.
+    fanout:
+      min: 1
+      max: 80
+
+selfReview:
+  criteria:
+    - check:
+        en: Whoever declares the radius is not whoever made the change
+        es: Quien declara el radio no es quien hizo el cambio
+      evidence: judgment
+    - check:
+        en: The scope's source has a measurement date and that date is fresh
+        es: La fuente del alcance tiene fecha de medición y esa fecha es fresca
+      how:
+        en: >
+          Name the source and when it was consulted. If it is an index, check its failure
+          queue and its last run. A dirty index does not inform the radius.
+        es: >
+          Nombra la fuente y cuándo se consultó. Si es un índice, comprueba su cola
+          de fallos y su última corrida. Un índice sucio no informa el radio.
+      evidence: measured
+    - check:
+        en: Each reached element has evidence of why it is inside
+        es: Cada elemento alcanzado tiene evidencia de por qué está dentro
+      how:
+        en: Go through the L2 list and check each one against the declared source.
+        es: Recorre la lista de L2 y contrasta cada uno contra la fuente declarada.
+      evidence: measured
+    - check:
+        en: Each boundary has evidence of why it is outside
+        es: Cada frontera tiene evidencia de por qué está fuera
+      how:
+        en: >
+          Go through the boundaries and check, against the same source, that there is no
+          path from the change. A boundary held up only by intuition does not count.
+        es: >
+          Recorre las fronteras y comprueba, contra la misma fuente, que no hay
+          camino desde el cambio. Una frontera sostenida solo en intuición no vale.
+      evidence: measured
+    - check:
+        en: If the radius could not be bounded, the verdict says MASSIVE and not bounded
+        es: Si el radio no se pudo acotar, el veredicto dice MASIVO y no acotado
+      evidence: judgment
+  groundingCheck: true
+  groundingScope:
+    en: some source, evidence or certification
+    es: alguna fuente, evidencia o certificación
+  assumptionsMustDeclare: true

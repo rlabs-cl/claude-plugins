@@ -1,0 +1,116 @@
+# Root cause analysis (RCA).
+#
+# It starts from not knowing: the signal records that something failed, and the RCA investigates until the cause is
+# confirmed with evidence. Its last level fixes what is touched (attribute `touches`) and how the fix is verified
+# (attributes `evidence`, `expect`, `on`).
+#
+# 2.0.0: the example catalog in English, bilingual.
+# 2.0.1: the last level says which values `evidence`, `expect` and `on` take.
+name: rca
+version: 2.0.1
+language: en
+description:
+  en: >-
+    Investigation of a failure from the signal to the cause confirmed with evidence, with what has to be touched and how the fix is verified. It is the working artifact of the `fix` lane: it fixes the touched artifacts and the verification. Choose it to explain a failure; to ask for something new, a PRD is the right one.
+  es: >-
+    Investigación de un fallo desde la señal hasta la causa confirmada con evidencia, con lo que hay que tocar y cómo se verifica el arreglo. Es el artefacto de trabajo del carril `fix`: fija los tocados y la verificación. Elígelo para explicar un fallo; para pedir algo nuevo corresponde un PRD.
+tags:
+  - { en: process, es: proceso }
+  - { en: failure, es: fallo }
+  - { en: cause, es: causa }
+
+kinds:
+  - name: goal
+    describes:
+      en: "a piece of the request (L0): the failure as it was reported or detected"
+      es: "pieza de la solicitud (L0): el fallo tal como se reportó o se detectó"
+  - name: hypothesis
+    describes:
+      en: a possible explanation of the failure (code, pipeline, environment or data)
+      es: una explicación posible del fallo (código, pipeline, entorno o datos)
+  - name: cause
+    describes:
+      en: the confirmed hypothesis, with the evidence that confirms it
+      es: la hipótesis confirmada, con la evidencia que la confirma
+  - name: remedy
+    describes:
+      en: "what has to change; attribute `touches`: the project's artifacts, separated by commas"
+      es: "lo que hay que cambiar; atributo `touches`: los artefactos del proyecto, separados por comas"
+  - name: verification
+    describes:
+      en: "how the fix is checked; attributes `evidence` (classes separated by commas: execution, report, statement), `expect` (success or failure) and `on` (before, change or environment)"
+      es: "cómo se comprueba el arreglo; atributos `evidence` (clases separadas por comas: execution, report, statement), `expect` (success o failure) y `on` (before, change o environment)"
+  - name: document
+    describes:
+      en: the RCA file, in the step's working folder
+      es: el fichero del RCA, en la carpeta de trabajo del paso
+
+extractors:
+  - mechanism: path
+    kind: document
+    pattern: "<name>.md"
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: { en: SIGNAL, es: SEÑAL }
+    instruction:
+      en: >
+        Declare the failure as it arrived: what was observed, where, and who reported it.
+        The cause is not known yet; do not write it here.
+      es: >
+        Declara el fallo tal como llegó: qué se observó, dónde y quién lo reportó.
+        Todavía no se sabe la causa; no la escribas aquí.
+  - id: L1
+    requiredRoles: []
+    title: { en: HYPOTHESES, es: HIPÓTESIS }
+    instruction:
+      en: >
+        Declare the hypotheses: in the code, the pipeline, the environment or the data.
+        Each one says what you would expect to see if it were true.
+      es: >
+        Declara las hipótesis: en el código, el pipeline, el entorno o los datos.
+        Cada una dice qué se esperaría ver si fuera cierta.
+    fanout:
+      min: 1
+      max: 20
+  - id: L2
+    requiredRoles: []
+    title: { en: CAUSE, es: CAUSA }
+    instruction:
+      en: >
+        Declare the confirmed cause and the evidence that confirmed it. The discarded
+        hypotheses stay in L1; here, only what survived the test.
+      es: >
+        Declara la causa confirmada y con qué evidencia se confirmó. Las hipótesis
+        descartadas se quedan en L1; aquí solo lo que resistió la prueba.
+    fanout:
+      min: 1
+      max: 10
+  - id: L3
+    requiredRoles: []
+    title: { en: REMEDY AND VERIFICATION, es: REMEDIO Y VERIFICACIÓN }
+    instruction:
+      en: >
+        Declare the remedy (type `remedy`, attribute `touches` with the project's
+        artifacts that have to be touched, separated by commas; none if the failure
+        is not in the project), the verification (type `verification`, attributes
+        `evidence` with the classes that count, separated by commas: `execution`,
+        `report` or `statement`; `expect`, required if `evidence` includes
+        `execution`: `success` or `failure`, no other value; and `on`, only with
+        `execution`: `before` for a test that fails before the change, `change`
+        for one that passes with it, or `environment` for a command against the
+        environment) and the RCA file (type `document`, with its `location`).
+      es: >
+        Declara el remedio (tipo `remedy`, atributo `touches` con los artefactos
+        del proyecto que hay que tocar, separados por comas; ninguno si el fallo no
+        está en el proyecto), la verificación (tipo `verification`, atributos
+        `evidence` con las clases que valen, separadas por comas: `execution`,
+        `report` o `statement`; `expect`, obligatorio si `evidence` incluye
+        `execution`: `success` o `failure`, ningún otro valor; y `on`, solo con
+        `execution`: `before` para una prueba que falla antes del cambio, `change`
+        para la que pasa con él, o `environment` para un comando contra el
+        entorno) y el fichero del RCA (tipo `document`, con su `location`).
+    fanout:
+      min: 1
+      max: 30

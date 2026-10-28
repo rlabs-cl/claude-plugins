@@ -1,0 +1,36 @@
+# A new product: from the PRD to the architecture, which fixes the artifacts, and from there to the system, accepted
+# with evidence.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `nuevo` 1.x.
+name: new
+version: 2.0.0
+language: en
+replaces: [nuevo]
+when:
+  en: A product or system that does not exist yet, with no project to touch.
+  es: Un producto o sistema que todavía no existe, sin proyecto que tocar.
+milestones: [deployment, delivery, execution]
+steps:
+  - { id: prd, kind: artifact, archetype: { name: prd }, gate: true, elicitation: true, feeds: [system] }
+  - { id: architecture, kind: artifact, archetype: { name: system-architecture }, gate: true, fixesTouches: true }
+  - { id: archetype, kind: artifact, archetype: { name: archetype-author }, optional: true, gate: true }
+  - { id: system, kind: system, fedBy: [prd] }
+  - id: acceptance
+    # Besides its own, the outputs of each touched artifact whose effective archetype asks for them: the floor and the
+    # whole e2e suite, with their composed commands.
+    outputs: true
+    kind: evidence
+    requires:
+      - id: acceptance
+        describes: { en: the product does what the PRD asks for, es: el producto hace lo que pide el PRD }
+        classes: [execution, statement]
+        expect: success
+  - id: milestone
+    kind: milestone
+    optional: true
+    gate: true
+    confirmation: true
+    requires:
+      - id: met
+        describes: { en: the person confirms the milestone was met, es: la persona confirma que el hito se cumplió }
+        classes: [statement]

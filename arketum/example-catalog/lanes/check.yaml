@@ -1,0 +1,33 @@
+# The grouped check: it checks the unchecked tweaks together. It recertifies each touched artifact against the current
+# tree (with inherited descent; the fixes go here, with the same limit as a tweak) and requires the outputs: the floor,
+# the whole e2e suite and the e2e of each functional requirement of the tweaks.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `comprobacion` 1.x.
+name: check
+version: 2.0.0
+language: en
+replaces: [comprobacion]
+when:
+  en: Check the unchecked tweaks together, before deploying or when they pile up.
+  es: Comprobar juntos los ajustes sin comprobar, antes de desplegar o cuando se acumulan.
+checks: true
+milestones: [deployment, delivery, execution]
+steps:
+  - { id: system, kind: system, maxChanges: 8, pieces: L1 }
+  - id: check
+    outputs: true
+    kind: evidence
+    requires:
+      - id: no-regression
+        describes: { en: what already worked still works, es: lo que ya funcionaba sigue funcionando }
+        classes: [execution]
+        expect: success
+  - id: milestone
+    kind: milestone
+    optional: true
+    gate: true
+    confirmation: true
+    requires:
+      - id: met
+        describes: { en: the person confirms the milestone was met, es: la persona confirma que el hito se cumplió }
+        classes: [statement]

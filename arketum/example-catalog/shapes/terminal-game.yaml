@@ -1,0 +1,220 @@
+# System shape: a one-screen game in the terminal, for one person, with no data to keep.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `juego-terminal` 1.x.
+name: terminal-game
+version: 2.0.0
+language: en
+replaces: [juego-terminal]
+description:
+  en: >-
+    A one-screen game in the terminal, for one person, with no data to keep between games and no other systems.
+  es: >-
+    Un juego de una pantalla en la terminal, para una persona, sin datos que guardar entre partidas ni otros sistemas.
+order: 1
+signals:
+  screens: number
+  actors: number
+  persistence: boolean
+  integrations: number
+  deployments: number
+# The name each signal had in the 1.x shape this one replaces: either name is accepted.
+formerSignals:
+  screens: pantallas
+  actors: actores
+  persistence: persistencia
+  integrations: integraciones
+  deployments: despliegues
+applies:
+  - [screens, '<=', 3]
+  - [actors, '<=', 1]
+  - [persistence, '==', false]
+  - [integrations, '==', 0]
+  - [deployments, '<=', 1]
+design:
+  - en: A single one-screen program, with no data to keep between games.
+    es: Un solo programa de una pantalla, sin datos que guardar entre partidas.
+  - en: The game logic (state, rules, score) is kept apart from how it is drawn and from how the keys are read.
+    es: La lógica del juego (estado, reglas, puntuación) está separada de cómo se dibuja y de cómo se leen las teclas.
+gaps:
+  - en: Which keys it is played with and how to quit.
+    es: Con qué teclas se juega y cómo se sale.
+  - en: How a game starts and how it ends, and what is shown at the end.
+    es: Cómo empieza y cómo termina una partida, y qué se ve al terminar.
+  - en: Who or what the player plays against, and what makes it harder.
+    es: Contra quién o qué se juega y qué lo hace más difícil.
+  - en: What screen size it has to fit in, and what happens if it does not fit.
+    es: En qué tamaño de pantalla tiene que caber y qué pasa si no cabe.
+
+# From the simplest to the most complete: the first one whose `applies` holds is the one that counts.
+variants:
+  - name: simple
+    applies:
+      - [screens, '<=', 1]
+    roles: &roles
+      - name: implementer
+        purpose:
+          en: builds the system in the system step (the code, its tests and the outputs the evidence step requires)
+          es: construye el sistema en el paso de sistema (el código, sus pruebas y las salidas que exige el paso de evidencia)
+        text:
+          en: >-
+            ROLE: IMPLEMENTER (phase 2). You build what was agreed, nothing more: the requirements the unit brings and the technical ones in force, with the archetype's craft.
+            You descend each touched artifact level by level, and the code stays the way its stack asks for it; you do not bend it to fit.
+            Every functional requirement you build carries its end-to-end test, which starts the artifact through its startup contract and uses it the way a person would:
+            a test that calls from the inside a function the real path never uses proves nothing.
+            You copy the catalog fixtures as they are and never edit them. You run the tests, the floor and the whole e2e suite yourself, and you link each run
+            to its requirements with `satisfies`. You never weaken or delete a test to make it pass. If something that worked breaks, you fix it;
+            if you cannot, you report it with `action: ask` (`asks: defect`) and the person decides. You never hide it.
+          es: >-
+            PAPEL: IMPLEMENTADOR (fase 2). Construyes lo acordado, nada más: los requisitos que trae la unidad y los técnicos vigentes, con el oficio del arquetipo.
+            Desciendes cada artefacto tocado nivel a nivel y el código se queda como lo pide su stack; no lo deformas para encajar.
+            Cada funcional que construyes lleva su prueba de extremo a extremo, que arranca el artefacto por su contrato de arranque y lo usa como una persona:
+            una prueba que llama por dentro a una función que el camino real no usa no demuestra nada.
+            Copias las fijaciones del catálogo tal cual y no las editas. Corres tú las pruebas, el suelo y la suite e2e entera, y vinculas cada ejecución
+            a sus requisitos con `satisfies`. No rebajas ni borras una prueba para que pase. Si algo que funcionaba se rompe, lo arreglas;
+            si no puedes, lo reportas con `action: ask` (`asks: defect`) y decide la persona. Nunca lo escondes.
+      - name: reviewer
+        purpose:
+          en: checks in the evidence step that what was built works through the real path, before handing in the evidence
+          es: revisa en el paso de evidencia que lo construido funciona por el camino real, antes de entregar la evidencia
+        text:
+          en: >-
+            ROLE: REVIEWER (phase 2). You do not write the code: you review it the way the person would use it. You check that every functional requirement built has its e2e test,
+            that the test starts the artifact through its startup contract instead of calling it from the inside, and that it passes; that the catalog fixtures were not touched;
+            and you look at the tests changed or deleted since the snapshot (the step summary lists them): if any was weakened to make it pass, you say so.
+            You run the floor and the whole e2e suite with the exact composed command and hand in that evidence. You do not accept what fails:
+            it gets fixed, or it gets reported as a defect with `action: ask` and the person decides. If a functional requirement does not allow an automated test
+            (an email, something visual, an external integration), you request that with `action: ask` (`asks: no_e2e`), giving the reason.
+          es: >-
+            PAPEL: REVISOR (fase 2). No escribes el código: lo revisas como lo usaría la persona. Compruebas que cada funcional construido tiene su prueba e2e,
+            que arranca el artefacto por su contrato de arranque y no lo llama por dentro, y que pasa; que las fijaciones del catálogo no se tocaron;
+            y miras las pruebas modificadas o borradas desde la foto (las lista el resumen del paso): si alguna se rebajó para que pase, lo dices.
+            Corres el suelo y la suite e2e entera con el comando compuesto exacto y entregas esa evidencia. Lo que falla no lo das por bueno:
+            se arregla, o se reporta como defecto con `action: ask` y decide la persona. Si un funcional no admite una prueba automática
+            (un correo, algo visual, una integración externa), lo pides con `action: ask` (`asks: no_e2e`), con el motivo.
+    outputs: { floor: true, e2e: true }
+    components:
+      - name: game
+        craft: &craft
+          - en: >-
+              Startup: the game is launched with `sh start.sh` from the root of the artifact, in a terminal, and plays in it. It receives from the environment `DATA_DIR`,
+              `HOME` and `PORT`, and keeps nothing between games. It says what it is and how to quit, and exits cleanly (code 0) with `q`, with `quit` (or `exit`) and Enter,
+              with the quit option of its menu, or when its input closes. On a screen smaller than it needs, it warns or exits cleanly, with no stack trace.
+            es: >-
+              Arranque: el juego se lanza con `sh start.sh` desde la raíz del artefacto, en una terminal, y juega en ella. Recibe del entorno `DATA_DIR`,
+              `HOME` y `PORT`, y no guarda nada entre partidas. Dice qué es y cómo se sale, y termina limpio (código 0) con `q`, con `quit` (o `exit`) y Enter,
+              con la opción de salir de su menú o al cerrarse la entrada. A una pantalla más pequeña de la que necesita, avisa o sale limpio, sin traza.
+        description:
+          en: >-
+            The whole game, in three rungs: what is asked for, its parts and the code, with the logic kept apart from the screen.
+          es: >-
+            El juego entero, en tres peldaños: lo que se pide, sus partes y el código, con la lógica separada de la pantalla.
+        kinds:
+          - { name: goal, describes: { en: "a piece of the request (L0), with no location in the tree", es: "pieza de la solicitud (L0), sin ubicación en el árbol" }, located: false }
+          - { name: module, describes: { en: the package or module definition, es: la definición del paquete o del módulo }, located: true }
+          - { name: domain, describes: { en: "the state, the rules and the score, without drawing or reading keys", es: "el estado, las reglas y la puntuación, sin dibujar ni leer teclas" }, located: true }
+          - { name: interface, describes: { en: how the screen is drawn and how the keys are read, es: cómo se dibuja la pantalla y cómo se leen las teclas }, located: true }
+          - { name: entrypoint, describes: { en: the entry point of the program, es: el punto de entrada del programa }, located: true }
+          - { name: test, describes: { en: a test file, es: fichero de prueba }, located: true }
+        coRequirements:
+          - { when: domain, requires: [test] }
+        levels:
+          - id: L0
+            requiredRoles: []
+            title: { en: REQUEST, es: SOLICITUD }
+            instruction: &l0
+              en: Declare which game is wanted, how it is played and how it is won or lost.
+              es: Declara qué juego se quiere, cómo se juega y cómo se gana o se pierde.
+          - id: L1
+            requiredRoles: []
+            title: { en: PARTS, es: PARTES }
+            instruction: &l1
+              en: Propose the parts, with the game logic kept apart from how it is drawn and from how the keys are read.
+              es: Propón las partes, con la lógica del juego separada de cómo se dibuja y de cómo se leen las teclas.
+            fanout: { min: 2, max: 12 }
+          - id: L2
+            requiredRoles: []
+            title: { en: IMPLEMENTATION, es: IMPLEMENTACIÓN }
+            instruction: &code
+              en: Write the code; the logic is tested without a terminal.
+              es: Escribe el código; la lógica se prueba sin terminal.
+            fanout: { min: 1, max: 40 }
+        selfReview:
+          criteria: &criteria
+            - check:
+                en: The game logic is tested without opening the terminal
+                es: La lógica del juego se prueba sin abrir la terminal
+              how:
+                en: Search the domain tests for any use of the screen or the keys.
+                es: Busca en las pruebas del dominio cualquier uso de la pantalla o de las teclas.
+              evidence: measured
+            - check:
+                en: What was implemented is the game asked for in L0, and not a similar one
+                es: Lo implementado es el juego que se pidió en L0, y no uno parecido
+              evidence: judgment
+  - name: full
+    applies: []
+    roles: *roles
+    outputs: { floor: true, e2e: true }
+    components:
+      - name: game
+        craft: *craft
+        description:
+          en: >-
+            The whole game, in five rungs: what is asked for, its parts, its contracts, the wiring and the code.
+          es: >-
+            El juego entero, en cinco peldaños: lo que se pide, sus partes, sus contratos, el cableado y el código.
+        kinds:
+          - { name: goal, describes: { en: "a piece of the request (L0), with no location in the tree", es: "pieza de la solicitud (L0), sin ubicación en el árbol" }, located: false }
+          - { name: module, describes: { en: the package or module definition, es: la definición del paquete o del módulo }, located: true }
+          - { name: domain, describes: { en: "the state, the rules and the score, without drawing or reading keys", es: "el estado, las reglas y la puntuación, sin dibujar ni leer teclas" }, located: true }
+          - { name: interface, describes: { en: how the screen is drawn and how the keys are read, es: cómo se dibuja la pantalla y cómo se leen las teclas }, located: true }
+          - { name: entrypoint, describes: { en: the entry point of the program, es: el punto de entrada del programa }, located: true }
+          - { name: test, describes: { en: a test file, es: fichero de prueba }, located: true }
+          - { name: dependency, describes: { en: "an edge of the wiring (L3) between two declared pieces", es: "arista del cableado (L3) entre dos piezas declaradas" }, located: false }
+        coRequirements:
+          - { when: domain, requires: [test] }
+        levels:
+          - id: L0
+            requiredRoles: []
+            title: { en: REQUEST, es: SOLICITUD }
+            instruction: *l0
+          - id: L1
+            requiredRoles: []
+            title: { en: PARTS, es: PARTES }
+            instruction: *l1
+            fanout: { min: 2, max: 14 }
+          - id: L2
+            requiredRoles: []
+            title: { en: CONTRACTS, es: CONTRATOS }
+            instruction:
+              en: Declare what each part offers to the others, and what happens at the edges (the small screen, the key that is not valid).
+              es: Declara qué ofrece cada parte a las demás, y qué pasa en los bordes (la pantalla pequeña, la tecla que no vale).
+            fanout: { min: 1, max: 30 }
+          - id: L3
+            requiredRoles: []
+            title: { en: WIRING, es: CABLEADO }
+            instruction:
+              en: Declare what depends on what; the logic does not depend on the screen.
+              es: Declara qué depende de qué; la lógica no depende de la pantalla.
+            fanout: { min: 1, max: 40 }
+          - id: L4
+            requiredRoles: []
+            title: { en: IMPLEMENTATION, es: IMPLEMENTACIÓN }
+            instruction: *code
+            fanout: { min: 1, max: 70 }
+        selfReview:
+          criteria: *criteria
+
+tiers:
+  - name: multiple-screens
+    when:
+      - [screens, '>=', 2]
+    design:
+      - en: Each screen has its own reading of keys; one menu is not copied into several places.
+        es: Cada pantalla tiene su propia lectura de teclas; un mismo menú no se copia en varios sitios.
+    gaps:
+      - en: How to move from one screen to another and how to come back.
+        es: Cómo se pasa de una pantalla a otra y cómo se vuelve.
+    craft:
+      - en: Each screen is a function of the interface with its own reading of keys.
+        es: Cada pantalla es una función de la interfaz con su propia lectura de teclas.

@@ -1,0 +1,210 @@
+# Infrastructure survey.
+#
+# Working artifact of the `deploy` lane: it goes in a step marked `pending`, it is
+# carried by the phase 1 roles (the analyst talks with the person; the architect
+# deduces the technical side, proposes the mode and writes the pending items) and
+# it feeds the system step and the `ready` evidence step. It inquires: where it is
+# deployed, in which environments, with which access and configuration, who
+# operates it, how far it is automated and how it is known to work. It does not
+# fill in a list.
+#
+# What cannot be answered in the session is a `pending` (L1): Arketum generates
+# the questionnaire, the unit pauses and the answers come in at the last level
+# (L2), as children of their pending item. The vocabulary of the pending items
+# (`environment`, `pending`, `answer`, `reference`) belongs to the core.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `levantamiento-de-infraestructura` 1.x.
+name: infrastructure-survey
+version: 2.0.0
+language: en
+replaces: [levantamiento-de-infraestructura]
+description:
+  en: >-
+    A complete survey of the infrastructure where a system is deployed: scope and environments, access, configuration, operation, automation and verification, with what is missing as pending items the person brings in outside the session. It ends in the deployment mode and in the technical requirements of each environment. Choose it before preparing a deployment; to ask for functionality, a PRD is the right one.
+  es: >-
+    Levantamiento completo de la infraestructura donde se despliega un sistema: alcance y entornos, accesos, configuración, operación, automatización y verificación, con lo que falta como pendientes que la persona trae fuera de la sesión. Termina en el modo de despliegue y en los requisitos técnicos de cada entorno. Elígelo antes de preparar un despliegue; para pedir funcionalidad corresponde un PRD.
+tags:
+  - { en: process, es: proceso }
+  - { en: deployment, es: despliegue }
+  - { en: infrastructure, es: infraestructura }
+
+kinds:
+  - name: deployable
+    describes:
+      en: "scope (L0): a project artifact that is deployed"
+      es: "alcance (L0): un artefacto del proyecto que se despliega"
+  - name: environment
+    describes:
+      en: "scope (L0): an environment where it is deployed (`local`, `staging`, `production`), with its id as a slug and `deploys: yes|no` (whether this unit deploys it or only prepares it)"
+      es: "alcance (L0): un entorno donde se despliega (`local`, `staging`, `production`), con su id como slug y `deploys: yes|no` (si esta unidad lo despliega o solo lo prepara)"
+  - name: topic
+    describes:
+      en: "what needs to be known about an environment (L1), with its role: `access`, `configuration`, `operation`, `automation`, `verification`, or another one (`network`, `data`, `cost`, `compliance`, `recovery`…)"
+      es: "lo que hay que saber de un entorno (L1), con su rol: `access`, `configuration`, `operation`, `automation`, `verification`, u otro (`network`, `data`, `cost`, `compliance`, `recovery`…)"
+  - name: pending
+    describes:
+      en: "what cannot be answered in the session (L1): `what`, `because` (required), `where`, `who`, `answer` (`value`, `reference` or `confirmation`) and `before` (`prepare` or `deploy:<env>`)"
+      es: "lo que no se puede responder en la sesión (L1): `what`, `because` (obligatorio), `where`, `who`, `answer` (`value`, `reference` o `confirmation`) y `before` (`prepare` o `deploy:<env>`)"
+  - name: requirement
+    describes:
+      en: "what was agreed (L2), as a requirement: `technical` (with `environment`, the one for each environment; with `mode`, the one for the mode) or `decision` (with `before: deploy:<env>`, the one for a pending item needed before deploying)"
+      es: "lo acordado (L2), como requisito: `technical` (con `environment` el de cada entorno, con `mode` el del modo) o `decision` (con `before: deploy:<env>` la de un pendiente de antes de desplegar)"
+  - name: answer
+    describes:
+      en: "the answer to a pending item needed before preparing (L2): `of` (the pending item) and its `value`, its `reference` or its `confirmation`"
+      es: "la respuesta a un pendiente de antes de preparar (L2): `of` (el pendiente) y su `value`, su `reference` o su `confirmation`"
+  - name: reference
+    describes:
+      en: "where a secret the deployment needs lives (L2): `reference: <scheme>:<path>` and its verification (`evidence: execution`, `expect: success`, `on: environment`), or `verifiable: no` with its `reason`"
+      es: "dónde vive un secreto que el despliegue necesita (L2): `reference: <scheme>:<path>` y su verificación (`evidence: execution`, `expect: success`, `on: environment`), o `verifiable: no` con su `reason`"
+  - name: document
+    describes:
+      en: the survey file, in the working folder of the step (never the questionnaire, which goes outside the repository)
+      es: el fichero del levantamiento, en la carpeta de trabajo del paso (nunca el cuestionario, que va fuera del repositorio)
+
+extractors:
+  - mechanism: path
+    kind: document
+    pattern: "<name>.md"
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: { en: SCOPE, es: ALCANCE }
+    instruction:
+      en: >
+        Declare what is deployed (one `deployable` per project artifact) and in
+        which environments (one `environment` per environment, with its id as a
+        slug: `local`, `staging`, `production`). Ask the person where they want
+        it running and who is going to use it in each place; do not propose how
+        yet. Each `environment` carries the attribute `deploys`: `yes` if this
+        unit deploys it and leaves it running (then the unit carries the
+        milestone `deployment <env>`), `no` if it only prepares it. It comes
+        from what the person asks for, not from what is most comfortable for
+        you: if they say «I want to see it running on my laptop now», `local`
+        carries `deploys: yes`. At most one environment is deployed in a unit;
+        the others, in another one.
+      es: >
+        Declara qué se despliega (un `deployable` por artefacto del proyecto) y en
+        qué entornos (un `environment` por entorno, con su id como slug: `local`,
+        `staging`, `production`). Pregúntale a la persona dónde quiere tenerlo
+        funcionando y quién lo va a usar en cada sitio; no propongas todavía cómo.
+        Cada `environment` lleva el atributo `deploys`: `yes` si esta unidad lo
+        despliega y lo deja funcionando (entonces la unidad lleva el hito
+        `deployment <env>`), `no` si solo lo prepara. Sale de lo que pide la
+        persona, no de lo que te resulte más cómodo: si dice «quiero verla
+        funcionando en mi portátil ya», `local` lleva `deploys: yes`. Como mucho
+        un entorno se despliega en una unidad; los demás, en otra.
+  - id: L1
+    requiredRoles: [access, configuration, operation, automation, verification]
+    title: { en: WHAT NEEDS TO BE KNOWN, es: LO QUE HAY QUE SABER }
+    instruction:
+      en: >
+        Inquire into each environment: every `environment` in the scope has
+        children here, and together they cover at least the roles `access`
+        (accounts, permissions, credentials: where they live), `configuration`
+        (variables, domains, ports, image registries), `operation` (who
+        operates it, how it is updated, what happens if it goes down),
+        `automation` (how far it is automated and what each party deploys) and
+        `verification` (how to know it works after deploying). The list is NOT
+        closed: ask what else there is (`network`, `data`, `cost`,
+        `compliance`, `recovery`…) and declare it with its role. On the
+        technical side of infrastructure this instruction prevails over the
+        text of the role: the architect does name technologies, ports, paths
+        and commands. What cannot be answered in the session (an access that
+        has to be requested, a fact owned by another team) is a `pending`,
+        child of its environment, with `what`, `because` (required: what it is
+        needed for), `where` (another team, the provider console, a contract),
+        `who` (who brings it), `answer` (`value` if it is a fact that is not
+        secret, `reference` if it is where a secret lives, never the secret
+        itself, or `confirmation` if it is something done) and `before`
+        (`prepare` if without it nothing can be prepared, or `deploy:<env>` if
+        it is only needed before deploying that environment). When this level
+        is accepted with pending items, Arketum returns the questionnaire.
+      es: >
+        Indaga cada entorno: cada `environment` del alcance tiene hijos aquí, y entre
+        todos cubren al menos los roles `access` (cuentas, permisos, credenciales:
+        dónde viven), `configuration` (variables, dominios, puertos, registros de
+        imágenes), `operation` (quién lo opera, cómo se actualiza, qué pasa si se
+        cae), `automation` (hasta dónde se automatiza y qué despliega cada
+        cual) y `verification` (cómo se sabe que funciona después de desplegar).
+        La lista NO está cerrada: pregunta qué más hay (`network`, `data`, `cost`,
+        `compliance`, `recovery`…) y decláralo con su rol. En lo técnico de
+        infraestructura esta instrucción manda sobre el texto del papel: el
+        arquitecto sí nombra tecnologías, puertos, rutas y comandos. Lo que no se
+        puede responder en la sesión (un acceso que hay que pedir, un dato de otro
+        equipo) es un `pending`, hijo de su entorno, con `what`, `because`
+        (obligatorio: para qué hace falta), `where` (otro equipo, la consola del
+        proveedor, un contrato), `who` (quién lo trae), `answer` (`value` si
+        es un dato que no es secreto, `reference` si es dónde vive un secreto,
+        nunca el secreto, o `confirmation` si es algo hecho) y `before`
+        (`prepare` si sin él no se puede preparar, o `deploy:<env>` si
+        solo hace falta antes de desplegar ese entorno). Al aceptarse este nivel
+        con pendientes, Arketum devuelve el cuestionario.
+    fanout:
+      min: 5
+      max: 40
+  - id: L2
+    requiredRoles: []
+    title: { en: WHAT WAS AGREED, es: LO ACORDADO }
+    instruction:
+      en: >
+        Declare the agreed scope as requirements (attributes `type`,
+        `requirement`, `title`, `comesFrom` (the person's sentence or the
+        requirement it is deduced from), `because` in a `technical`,
+        `acceptance` and `artifact`: the id of the project's deployment
+        artifact, where they live). One `technical` per environment with the
+        attribute `environment` (the environments of the project are the ones
+        of those technical requirements), and the mode as a `technical` with
+        the attribute `mode` (`compose`, `pipeline`, `script` or another one)
+        and its `because`, which the person confirms at the gate; the other
+        technical requirements with their `because` («it is automated up to
+        staging», «production is deployed by operations with the script»). The
+        `decision` items that remain open. One `reference` per secret the
+        deployment needs (`reference: <scheme>:<path>`; common ones: `vault`,
+        `aws-sm`, `gcp-sm`, `azure-kv`, `github-secret`, `1password`,
+        `k8s-secret`, `env`), with its verification (`evidence: execution`,
+        `expect: success` and `on: environment`: a command that proves the
+        access without printing the value, such as `aws sts get-caller-identity`
+        or `gh secret list` filtered by name) or `verifiable: no` with its
+        `reason`. Each pending item from the previous level has its child here
+        (in `parents`): if it is `before: prepare`, an `answer` with
+        `of: <pending>` and its `value`, its `reference` or its
+        `confirmation`, according to what it asked for; if it is
+        `deploy:<env>`, a `decision` with `before: deploy:<env>`, which stays
+        to be decided and blocks the milestone of that environment. A `value`
+        ANSWER THE DEPLOYMENT DEPENDS ON (the region, the domain, the registry
+        name) IS ALSO RECORDED IN A `technical`: the `answer` does not go into
+        the input of the system step, and the technical requirement does.
+        Never a secret: Arketum rejects anything shaped like one. And the
+        survey file (kind `document`, with its `location`).
+      es: >
+        Declara el alcance acordado como requisitos (atributos `type`,
+        `requirement`, `title`, `comesFrom` —la frase de la persona o el requisito
+        del que se deduce—, `because` en un `technical`, `acceptance` y `artifact`:
+        el id del artefacto de despliegue del proyecto, donde viven). Un `technical`
+        por entorno con el atributo `environment` (los entornos del proyecto son los
+        de esos técnicos), y el modo como un `technical` con el atributo `mode`
+        (`compose`, `pipeline`, `script` u otro) y su `because`, que la persona
+        confirma en el gate; los demás técnicos con su `because` («se automatiza
+        hasta staging», «producción la despliega operaciones con el script»). Las
+        `decision` que siguen abiertas. Una `reference` por secreto que el
+        despliegue necesita (`reference: <scheme>:<path>`; habituales: `vault`,
+        `aws-sm`, `gcp-sm`, `azure-kv`, `github-secret`, `1password`,
+        `k8s-secret`, `env`), con su verificación —`evidence: execution`,
+        `expect: success` y `on: environment`: un comando que demuestra el acceso sin
+        imprimir el valor, como `aws sts get-caller-identity` o `gh secret list`
+        filtrado por nombre— o `verifiable: no` con su `reason`. Cada pendiente
+        del nivel anterior tiene aquí su hijo (en `parents`): si es `before:
+        prepare`, una `answer` con `of: <pending>` y su `value`, su
+        `reference` o su `confirmation`, según lo que pidió; si es
+        `deploy:<env>`, una `decision` con `before: deploy:<env>`, que queda
+        por decidir y bloquea el hito de ese entorno. UNA RESPUESTA `value` DE LA
+        QUE DEPENDA EL DESPLIEGUE (la región, el dominio, el nombre del registro)
+        SE RECOGE TAMBIÉN EN UN `technical`: la `answer` no entra en la entrada del
+        paso de sistema, y el técnico sí. Nunca un secreto: Arketum rechaza lo que
+        tenga su forma. Y el fichero del levantamiento (tipo `document`, con su
+        `location`).
+    fanout:
+      min: 3
+      max: 80

@@ -1,0 +1,266 @@
+# System shape: an app with a single deployment, with data that persists or with several screens or actors.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `aplicacion-por-capas` 1.x.
+name: layered-app
+version: 2.0.0
+language: en
+replaces: [aplicacion-por-capas]
+description:
+  en: >-
+    An app with a single deployment and data that persists, or with several screens or actors: its rules kept apart from how the data is stored and from how it is used.
+  es: >-
+    Una aplicación de un solo despliegue con datos que persisten, o con varias pantallas o actores: sus reglas separadas de cómo se guardan los datos y de cómo se usa.
+order: 2
+signals:
+  deployments: number
+  integrations: number
+  screens: number
+  actors: number
+# The name each signal had in the 1.x shape this one replaces: either name is accepted.
+formerSignals:
+  deployments: despliegues
+  integrations: integraciones
+  screens: pantallas
+  actors: actores
+applies:
+  - [deployments, '<=', 1]
+  - [integrations, '<=', 3]
+design:
+  - en: A single app, with its rules kept apart from how the data is stored and from how it is used (screens or commands).
+    es: Una sola aplicación, con sus reglas separadas de cómo se guardan los datos y de cómo se usa (pantallas o comandos).
+  - en: What is stored survives closing and opening again; if it cannot be read, the app warns and neither goes on empty nor overwrites it.
+    es: Lo que se guarda sobrevive a cerrar y volver a abrir; si no se puede leer, se avisa y no se sigue con vacío ni se sobrescribe.
+  - en: The rules that depend on time receive the instant; they do not depend on when they run.
+    es: Las reglas que dependen del tiempo reciben el instante; no dependen de cuándo se ejecutan.
+gaps:
+  - en: Which data is stored, where the first data comes from, and what has to still be there after closing and opening again.
+    es: Qué datos se guardan, de dónde salen los primeros y qué tiene que seguir ahí al cerrar y volver a abrir.
+  - en: What is computed from time (days, weeks, date changes) and from when it counts.
+    es: Qué se calcula a partir del tiempo (días, semanas, cambios de fecha) y desde cuándo cuenta.
+  - en: Who uses it, what each one uses it for, and what each one can change.
+    es: Quién la usa, para qué cada uno, y qué puede cambiar cada uno.
+  - en: What has to be correctable when someone makes a mistake, and whether what was there before matters.
+    es: Qué hay que poder corregir cuando alguien se equivoca, y si importa lo que había antes.
+  - en: What happens if the stored data gets corrupted or cannot be read.
+    es: Qué pasa si los datos guardados se estropean o no se pueden leer.
+
+variants:
+  - name: simple
+    applies:
+      - [actors, '<=', 1]
+      - [screens, '<=', 2]
+    roles: &roles
+      - name: implementer
+        purpose:
+          en: builds the system in the system step (the code, its tests and the outputs the evidence step requires)
+          es: construye el sistema en el paso de sistema (el código, sus pruebas y las salidas que exige el paso de evidencia)
+        text:
+          en: >-
+            ROLE: IMPLEMENTER (phase 2). You build what was agreed, nothing more: the requirements the unit brings and the technical ones in force, with the archetype's craft.
+            You descend each touched artifact level by level, and the code stays the way its stack asks for it; you do not bend it to fit.
+            Every functional requirement you build carries its end-to-end test, which starts the artifact through its startup contract and uses it the way a person would:
+            a test that calls from the inside a function the real path never uses proves nothing.
+            You copy the catalog fixtures as they are and never edit them. You run the tests, the floor and the whole e2e suite yourself, and you link each run
+            to its requirements with `satisfies`. You never weaken or delete a test to make it pass. If something that worked breaks, you fix it;
+            if you cannot, you report it with `action: ask` (`asks: defect`) and the person decides. You never hide it.
+          es: >-
+            PAPEL: IMPLEMENTADOR (fase 2). Construyes lo acordado, nada más: los requisitos que trae la unidad y los técnicos vigentes, con el oficio del arquetipo.
+            Desciendes cada artefacto tocado nivel a nivel y el código se queda como lo pide su stack; no lo deformas para encajar.
+            Cada funcional que construyes lleva su prueba de extremo a extremo, que arranca el artefacto por su contrato de arranque y lo usa como una persona:
+            una prueba que llama por dentro a una función que el camino real no usa no demuestra nada.
+            Copias las fijaciones del catálogo tal cual y no las editas. Corres tú las pruebas, el suelo y la suite e2e entera, y vinculas cada ejecución
+            a sus requisitos con `satisfies`. No rebajas ni borras una prueba para que pase. Si algo que funcionaba se rompe, lo arreglas;
+            si no puedes, lo reportas con `action: ask` (`asks: defect`) y decide la persona. Nunca lo escondes.
+      - name: reviewer
+        purpose:
+          en: checks in the evidence step that what was built works through the real path, before handing in the evidence
+          es: revisa en el paso de evidencia que lo construido funciona por el camino real, antes de entregar la evidencia
+        text:
+          en: >-
+            ROLE: REVIEWER (phase 2). You do not write the code: you review it the way the person would use it. You check that every functional requirement built has its e2e test,
+            that the test starts the artifact through its startup contract instead of calling it from the inside, and that it passes; that the catalog fixtures were not touched;
+            and you look at the tests changed or deleted since the snapshot (the step summary lists them): if any was weakened to make it pass, you say so.
+            You run the floor and the whole e2e suite with the exact composed command and hand in that evidence. You do not accept what fails:
+            it gets fixed, or it gets reported as a defect with `action: ask` and the person decides. If a functional requirement does not allow an automated test
+            (an email, something visual, an external integration), you request that with `action: ask` (`asks: no_e2e`), giving the reason.
+          es: >-
+            PAPEL: REVISOR (fase 2). No escribes el código: lo revisas como lo usaría la persona. Compruebas que cada funcional construido tiene su prueba e2e,
+            que arranca el artefacto por su contrato de arranque y no lo llama por dentro, y que pasa; que las fijaciones del catálogo no se tocaron;
+            y miras las pruebas modificadas o borradas desde la foto (las lista el resumen del paso): si alguna se rebajó para que pase, lo dices.
+            Corres el suelo y la suite e2e entera con el comando compuesto exacto y entregas esa evidencia. Lo que falla no lo das por bueno:
+            se arregla, o se reporta como defecto con `action: ask` y decide la persona. Si un funcional no admite una prueba automática
+            (un correo, algo visual, una integración externa), lo pides con `action: ask` (`asks: no_e2e`), con el motivo.
+    outputs: { floor: true, e2e: true }
+    components:
+      - name: app
+        craft: &craft
+          - en: >-
+              Startup: the app is launched with `sh start.sh` from the root of the artifact, in a terminal. It receives from the environment `DATA_DIR` (the folder for its data),
+              `HOME` and `PORT` (if it serves HTTP, it listens on 127.0.0.1 at that port). It writes to the terminal what it is and how to quit, responds to what is typed,
+              exits cleanly (code 0) with `q`, with `quit` (or `exit`) and Enter, with the quit option of its menu, or when its input closes,
+              and starts again with the data it left.
+            es: >-
+              Arranque: la aplicación se lanza con `sh start.sh` desde la raíz del artefacto, en una terminal. Recibe del entorno `DATA_DIR` (la carpeta de sus datos),
+              `HOME` y `PORT` (si sirve HTTP, escucha en 127.0.0.1 en ese puerto). Escribe en la terminal qué es y cómo se sale, responde a lo que se teclea,
+              termina limpio (código 0) con `q`, con `quit` (o `exit`) y Enter, con la opción de salir de su menú o al cerrarse la entrada,
+              y vuelve a arrancar con los datos que dejó.
+        description:
+          en: >-
+            The whole app, in three rungs: what is asked for, its layers and the code, with the domain kept apart from the storage and from the interface.
+          es: >-
+            La aplicación entera, en tres peldaños: lo que se pide, sus capas y el código, con el dominio separado del almacén y de la interfaz.
+        kinds:
+          - { name: goal, describes: { en: "a piece of the request (L0), with no location in the tree", es: "pieza de la solicitud (L0), sin ubicación en el árbol" }, located: false }
+          - { name: module, describes: { en: the package or module definition, es: la definición del paquete o del módulo }, located: true }
+          - { name: domain, describes: { en: "the entities and their rules, pure: no files, no interface and no reading the clock", es: "las entidades y sus reglas, puras: sin ficheros, sin interfaz y sin leer el reloj" }, located: true }
+          - { name: storage, describes: { en: saving and loading the state, es: guardar y cargar el estado }, located: true }
+          - { name: service, describes: { en: "one use case per action, over the domain and the storage, with no interface", es: "un caso de uso por acción, sobre el dominio y el almacén, sin interfaz" }, located: true }
+          - { name: interface, describes: { en: "the presentation and the reading of commands; it calls the services", es: "la presentación y la lectura de órdenes; llama a los servicios" }, located: true }
+          - { name: client, describes: { en: the only place that talks to another system, es: el único sitio que habla con otro sistema }, located: true }
+          - { name: entrypoint, describes: { en: "puts together storage, services and interface, and starts", es: "compone almacén, servicios e interfaz y arranca" }, located: true }
+          - { name: test, describes: { en: a test file, es: fichero de prueba }, located: true }
+        coRequirements:
+          - { when: service, requires: [test] }
+        levels:
+          - id: L0
+            requiredRoles: []
+            title: { en: REQUEST, es: SOLICITUD }
+            instruction:
+              en: Declare what the app has to do, for whom, and what has to still be there after closing it and opening it again.
+              es: Declara qué tiene que hacer la aplicación, para quién y qué tiene que seguir ahí al cerrarla y volver a abrirla.
+          - id: L1
+            requiredRoles: []
+            title: { en: LAYERS, es: CAPAS }
+            instruction:
+              en: Propose the pieces by layer (domain, storage, services, interface, entry point), with the domain free of files and interface.
+              es: Propón las piezas por capa (dominio, almacén, servicios, interfaz, arranque), con el dominio sin ficheros ni interfaz.
+            fanout: { min: 3, max: 16 }
+          - id: L2
+            requiredRoles: []
+            title: { en: IMPLEMENTATION, es: IMPLEMENTACIÓN }
+            instruction:
+              en: Write the code; every service with its test, which does not open the interface.
+              es: Escribe el código; cada servicio con su prueba, que no abre la interfaz.
+            fanout: { min: 1, max: 60 }
+        selfReview:
+          criteria:
+            - check:
+                en: The interface only calls the services; never the storage or files
+                es: La interfaz solo llama a los servicios; nunca al almacén ni a ficheros
+              how:
+                en: Search the interface for any use of the storage or of files.
+                es: Busca en la interfaz cualquier uso del almacén o de ficheros.
+              evidence: measured
+            - &persists
+              check:
+                en: What is stored survives closing and opening again, and a failure to read it is reported
+                es: Lo que se guarda sobrevive a cerrar y volver a abrir, y un fallo al leerlo se avisa
+              how:
+                en: Read the test that saves and loads again, and the one that reads a corrupted file.
+                es: Lee la prueba que guarda, vuelve a cargar y la que lee un fichero estropeado.
+              evidence: measured
+  - name: full
+    applies: []
+    roles: *roles
+    outputs: { floor: true, e2e: true }
+    components:
+      - name: app
+        craft: *craft
+        description:
+          en: >-
+            The whole app, in five rungs: what is asked for, its layers, its contracts, the wiring and the code.
+          es: >-
+            La aplicación entera, en cinco peldaños: lo que se pide, sus capas, sus contratos, el cableado y el código.
+        kinds:
+          - { name: goal, describes: { en: "a piece of the request (L0), with no location in the tree", es: "pieza de la solicitud (L0), sin ubicación en el árbol" }, located: false }
+          - { name: module, describes: { en: the package or module definition, es: la definición del paquete o del módulo }, located: true }
+          - { name: domain, describes: { en: "the entities and their rules, pure: no files, no interface and no reading the clock", es: "las entidades y sus reglas, puras: sin ficheros, sin interfaz y sin leer el reloj" }, located: true }
+          - { name: storage, describes: { en: saving and loading the state, es: guardar y cargar el estado }, located: true }
+          - { name: service, describes: { en: "one use case per action, over the domain and the storage, with no interface", es: "un caso de uso por acción, sobre el dominio y el almacén, sin interfaz" }, located: true }
+          - { name: interface, describes: { en: "the presentation and the reading of commands; it calls the services", es: "la presentación y la lectura de órdenes; llama a los servicios" }, located: true }
+          - { name: client, describes: { en: the only place that talks to another system, es: el único sitio que habla con otro sistema }, located: true }
+          - { name: entrypoint, describes: { en: "puts together storage, services and interface, and starts", es: "compone almacén, servicios e interfaz y arranca" }, located: true }
+          - { name: test, describes: { en: a test file, es: fichero de prueba }, located: true }
+          - { name: dependency, describes: { en: "an edge of the wiring (L3) between two declared pieces", es: "arista del cableado (L3) entre dos piezas declaradas" }, located: false }
+        coRequirements:
+          - { when: service, requires: [test] }
+          - { when: storage, requires: [test] }
+        levels:
+          - id: L0
+            requiredRoles: []
+            title: { en: REQUEST, es: SOLICITUD }
+            instruction:
+              en: Declare what the app has to do, for whom, and what has to still be there after closing it and opening it again.
+              es: Declara qué tiene que hacer la aplicación, para quién y qué tiene que seguir ahí al cerrarla y volver a abrirla.
+          - id: L1
+            requiredRoles: []
+            title: { en: LAYERS, es: CAPAS }
+            instruction:
+              en: Propose the pieces by layer (domain, storage, services, interface, entry point), with the domain free of files and interface.
+              es: Propón las piezas por capa (dominio, almacén, servicios, interfaz, arranque), con el dominio sin ficheros ni interfaz.
+            fanout: { min: 3, max: 20 }
+          - id: L2
+            requiredRoles: []
+            title: { en: CONTRACTS, es: CONTRATOS }
+            instruction:
+              en: Declare each use case with what it receives, what it returns and how it fails; and what the storage keeps.
+              es: Declara cada caso de uso con lo que recibe, lo que devuelve y cómo falla; y qué guarda el almacén.
+            fanout: { min: 1, max: 40 }
+          - id: L3
+            requiredRoles: []
+            title: { en: WIRING, es: CABLEADO }
+            instruction:
+              en: Declare what depends on what; the domain depends on nothing and the interface only on the services.
+              es: Declara qué depende de qué; el dominio no depende de nadie y la interfaz solo de los servicios.
+            fanout: { min: 1, max: 50 }
+          - id: L4
+            requiredRoles: []
+            title: { en: IMPLEMENTATION, es: IMPLEMENTACIÓN }
+            instruction:
+              en: Write the code; every service and the storage with its test, which does not open the interface.
+              es: Escribe el código; cada servicio y el almacén con su prueba, que no abre la interfaz.
+            fanout: { min: 1, max: 90 }
+        selfReview:
+          criteria:
+            - check:
+                en: The interface only calls the services; never the storage or files
+                es: La interfaz solo llama a los servicios; nunca al almacén ni a ficheros
+              how:
+                en: Follow the dependencies declared in L3 starting from the interface.
+                es: Sigue las dependencias declaradas en L3 desde la interfaz.
+              evidence: measured
+            - *persists
+
+tiers:
+  - name: multiple-actors
+    when:
+      - [actors, '>=', 2]
+    design:
+      - en: Each actor has its own way in and sees only what is theirs; management is not mixed with daily use.
+        es: Cada actor tiene su vía y solo ve lo suyo; lo que es de gestión no se mezcla con el uso diario.
+    gaps:
+      - en: What each actor can and cannot do, and how the app knows who is who.
+        es: Qué puede hacer cada actor y qué no, y cómo se sabe quién es.
+    craft:
+      - en: Each actor has its own way in through the interface; management is not mixed with daily use.
+        es: Cada actor tiene su vía en la interfaz; lo que es de gestión no se mezcla con el uso diario.
+  - name: multiple-screens
+    when:
+      - [screens, '>=', 3]
+    craft:
+      - en: Each screen is a function of the interface with its own reading of commands; one menu is not copied into several places.
+        es: Cada pantalla es una función de la interfaz con su propia lectura de órdenes; un mismo menú no se copia en varios sitios.
+  - name: integrations
+    when:
+      - [integrations, '>=', 1]
+    design:
+      - en: Each outside system is used through a single place, which can be replaced by a double for testing.
+        es: Cada sistema ajeno se usa a través de un solo sitio, que se puede sustituir por un doble para probar.
+    gaps:
+      - en: What happens when the other system fails, is slow or answers something unexpected.
+        es: Qué pasa cuando el otro sistema falla, tarda o responde algo inesperado.
+    craft:
+      - en: Each client of another system has a double for testing without the real system, which covers failure and delay.
+        es: Cada cliente de otro sistema tiene un doble para probar sin el sistema real, que cubre el fallo y la demora.
+    coRequirements:
+      - { when: client, requires: [test] }

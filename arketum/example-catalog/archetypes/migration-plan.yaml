@@ -1,0 +1,65 @@
+# Migration plan.
+#
+# The moves that take the current system to the new one, each one with the
+# artifacts it touches. Once approved, it fixes the touched artifacts of the unit.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `plan-de-migracion` 1.x.
+name: migration-plan
+version: 2.0.0
+language: en
+replaces: [plan-de-migracion]
+description:
+  en: >-
+    The moves that take an existing system to its new form, in order and with the artifacts each one touches. It is the working artifact of the migration lane that fixes the touched artifacts. Choose it to plan a migration; to bound a change without migrating, the blast radius is the right one.
+  es: >-
+    Los movimientos que llevan un sistema existente a su forma nueva, en orden y con los artefactos que toca cada uno. Es el artefacto de trabajo del carril de migración que fija los tocados. Elígelo para planificar una migración; para acotar un cambio sin migrar corresponde el radio de alcance.
+tags:
+  - { en: process, es: proceso }
+  - { en: migration, es: migración }
+  - { en: plan, es: plan }
+
+kinds:
+  - name: goal
+    describes:
+      en: "piece of the request (L0): what is migrated from and to"
+      es: "pieza de la solicitud (L0): de dónde a dónde se migra"
+  - name: move
+    describes:
+      en: "a step of the migration; attribute `touches`: the project artifacts it touches, separated by commas"
+      es: "un paso de la migración; atributo `touches`: los artefactos del proyecto que toca, separados por comas"
+  - name: document
+    describes:
+      en: the plan file, in the working folder of the step
+      es: el fichero del plan, en la carpeta de trabajo del paso
+
+extractors:
+  - mechanism: path
+    kind: document
+    pattern: "<name>.md"
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: { en: MIGRATION, es: MIGRACIÓN }
+    instruction:
+      en: >
+        Declare what is migrated from and to, and what cannot be lost (the
+        functional inventory).
+      es: >
+        Declara de dónde a dónde se migra y qué no se puede perder (el inventario
+        funcional).
+  - id: L1
+    requiredRoles: []
+    title: { en: MOVES, es: MOVIMIENTOS }
+    instruction:
+      en: >
+        Declare the moves in order, each one with the attribute `touches` (the
+        project artifacts it touches, separated by commas), and the plan file
+        (kind `document`, with its `location`).
+      es: >
+        Declara los movimientos en orden, cada uno con el atributo `touches` (los
+        artefactos del proyecto que toca, separados por comas), y el fichero del
+        plan (tipo `document`, con su `location`).
+    fanout:
+      min: 1
+      max: 60

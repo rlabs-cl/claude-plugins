@@ -1,0 +1,33 @@
+# A migration: what the system does today, how it moves (the plan fixes the touched artifacts) and the evidence that it
+# works afterwards. The person approves the inventory and it feeds the system: what the system does today must be
+# served by what is migrated, and its functions can seed the requirements index.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `migracion` 1.x.
+name: migration
+version: 2.0.0
+language: en
+replaces: [migracion]
+when:
+  en: Move an existing system to another shape, platform or architecture without losing what it does.
+  es: Llevar un sistema existente a otra forma, plataforma o arquitectura sin perder lo que hace.
+milestones: [deployment, delivery, execution]
+steps:
+  - { id: inventory, kind: artifact, archetype: { name: functional-inventory }, gate: true, feeds: [system] }
+  - { id: plan, kind: artifact, archetype: { name: migration-plan }, gate: true, fixesTouches: true, feeds: [system] }
+  - { id: system, kind: system, fedBy: [inventory, plan] }
+  - id: evidence
+    kind: evidence
+    requires:
+      - id: works
+        describes: { en: what was migrated does what it used to do, es: lo migrado hace lo que hacía }
+        classes: [execution]
+        expect: success
+  - id: milestone
+    kind: milestone
+    optional: true
+    gate: true
+    confirmation: true
+    requires:
+      - id: met
+        describes: { en: the person confirms the milestone was met, es: la persona confirma que el hito se cumplió }
+        classes: [statement]

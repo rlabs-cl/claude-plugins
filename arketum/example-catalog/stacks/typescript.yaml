@@ -1,0 +1,87 @@
+# Stack: TypeScript, with Node and vitest.
+#
+# The code in `src/<layer>/`, the tests next to what they test, the fixtures (the floors over a terminal and the e2e
+# helper for vitest, with a terminal bridge in Python) copied into `arketum/fixtures/<name>/`.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `typescript` 1.x (same name).
+name: typescript
+version: 2.0.0
+language: en
+description:
+  en: >-
+    TypeScript on Node, with vitest: the code in `src/<layer>/`, with several files per layer, the tests `<name>.test.ts` next to what they test and the end-to-end ones in `src/e2e/`, `src/main.ts` and `start.sh` as the entrypoint and `package.json` and `tsconfig.json` at the root of the artifact.
+  es: >-
+    TypeScript sobre Node, con vitest: el código en `src/<layer>/`, con varios ficheros por capa, las pruebas `<name>.test.ts` junto a lo que prueban y las de extremo a extremo en `src/e2e/`, `src/main.ts` y `start.sh` como arranque y `package.json` y `tsconfig.json` en la raíz del artefacto.
+
+# Paths relative to the root of the artifact.
+locations:
+  module: { pattern: ["package.json", "tsconfig.json", "package-lock.json", "README.md"] }
+  domain: { pattern: "src/domain/<name>.ts", excluding: ["src/domain/<name>.test.ts"] }
+  storage: { pattern: "src/storage/<name>.ts", excluding: ["src/storage/<name>.test.ts"] }
+  service: { pattern: "src/services/<name>.ts", excluding: ["src/services/<name>.test.ts"] }
+  interface:
+    pattern: ["src/interface/<name>.ts", "src/interface/static/<name>.<ext>", "src/interface/static/<folder>/<name>.<ext>"]
+    excluding: ["src/interface/<name>.test.ts"]
+  api: { pattern: "src/api/<name>.ts", excluding: ["src/api/<name>.test.ts"] }
+  client: { pattern: "src/clients/<name>.ts", excluding: ["src/clients/<name>.test.ts"] }
+  entrypoint: { pattern: ["src/main.ts", "start.sh"] }
+  test: { pattern: "src/<folder>/<name>.test.ts" }
+  # What configures how the tests run (it is not a piece type): the closing shows it when it changes.
+  test-config: { pattern: ["vitest.config.<ext>", "vitest.workspace.<ext>", "vite.config.<ext>"] }
+
+samples:
+  module: [package.json, tsconfig.json, README.md]
+  domain: [src/domain/order.ts, src/domain/product.ts]
+  storage: [src/storage/sqlite.ts]
+  service: [src/services/orders.ts, src/services/cart.ts]
+  interface: [src/interface/web.ts, src/interface/static/style.css, src/interface/static/css/base.css]
+  api: [src/api/routes.ts]
+  client: [src/clients/catalog.ts]
+  entrypoint: [src/main.ts, start.sh]
+  test: [src/services/orders.test.ts, src/domain/order.test.ts, src/e2e/purchase.test.ts]
+  test-config: [vitest.config.ts, vitest.config.mjs, vite.config.ts]
+
+# What npm, tsc and vitest generate (and Python, when running the floor): it is not claimed nor counted as a change.
+generated: [node_modules/, dist/, coverage/, __pycache__/]
+
+craft:
+  - en: 'Strict typing (`strict: true`); no `any` without a comment that says why.'
+    es: 'Tipado estricto (`strict: true`); nada de `any` sin un comentario que diga por qué.'
+  - en: One file per concept inside the folder of its layer; everything is not lumped into one.
+    es: Un fichero por concepto dentro de la carpeta de su capa; no se junta todo en uno.
+  - en: The domain imports nothing from Node (`fs`, `http`, `process`); the instant comes in as a parameter.
+    es: El dominio no importa nada de Node (`fs`, `http`, `process`); el instante entra como parámetro.
+  - en: A failure reading what was saved is not swallowed - it is reported and it stops; it never goes on with nothing nor overwrites.
+    es: Un fallo al leer lo guardado no se traga - se avisa y se para; nunca se sigue con vacío ni se sobrescribe.
+  - en: Ports and URLs come from the environment, never written by hand.
+    es: Los puertos y las URL salen del entorno, nunca escritos a mano.
+  - en: '`start.sh` launches the application (`exec node dist/main.js "$@"`, or with the TypeScript loader of the project): it is what the floor and the e2e tests launch.'
+    es: '`start.sh` lanza la aplicación (`exec node dist/main.js "$@"`, o con el cargador de TypeScript del proyecto): es lo que lanzan el suelo y las pruebas e2e.'
+  - en: The e2e tests (`src/e2e/`) start the application with `start` from the e2e fixture (`arketum/fixtures/e2e/app.mjs`) or, a terminal program, with `openTerminal`, and use it through the real interface (HTTP on `PORT`, its input and its output, or the terminal), like a person; they never import its code. `openTerminal` also needs `pyte`. The floor needs `python3` with `pyte` (`python3 -m pip install -r arketum/fixtures/floor/requirements.txt`), which belongs to the tests, not to the product.
+    es: Las pruebas e2e (`src/e2e/`) arrancan la aplicación con `start` de la fijación e2e (`arketum/fixtures/e2e/app.mjs`) o, un programa de terminal, con `openTerminal`, y la usan por la interfaz real (HTTP en `PORT`, su entrada y su salida o la terminal), como una persona; nunca importan su código. `openTerminal` también necesita `pyte`. El suelo necesita `python3` con `pyte` (`python3 -m pip install -r arketum/fixtures/floor/requirements.txt`), que es de las pruebas, no del producto.
+
+# Fixed by the catalog: copied as they are into `arketum/fixtures/<name>/` of the artifact and never edited (the
+# closing compares their checksum).
+fixtures:
+  - { from: stacks/typescript/floor-terminal-game, name: floor, for: floor, shapes: [terminal-game] }
+  - { from: stacks/typescript/floor-layered-app, name: floor, for: floor, shapes: [layered-app] }
+  - { from: stacks/typescript/e2e-node, name: e2e, for: e2e, shapes: [terminal-game, layered-app] }
+
+# The arguments with which its test runner (vitest) runs none, or accepts a suite without tests: a run of the e2e
+# suite with one of them does not count as e2e.
+notRun: [--passWithNoTests, --pass-with-no-tests, --help, -h, --version, -v, --list, --listTests, --list-tests, --showConfig]
+
+commands:
+  tests: npx vitest run
+  floor: python3 -B arketum/fixtures/floor/floor.py .
+  e2e: npx vitest run --config arketum/fixtures/e2e/vitest.config.mjs
+
+selfReview:
+  criteria:
+    - check:
+        en: The code compiles without errors with `tsc --noEmit`
+        es: El código compila sin errores con `tsc --noEmit`
+      how:
+        en: Run `npx tsc --noEmit` and read the output.
+        es: Corre `npx tsc --noEmit` y lee la salida.
+      evidence: measured

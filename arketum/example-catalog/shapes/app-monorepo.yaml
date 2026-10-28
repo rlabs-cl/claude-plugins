@@ -1,0 +1,282 @@
+# System shape: two or three apps deployed separately, in one repository, with a boundary between them.
+# It declares no outputs: the floor and the e2e of several deployments bring up the whole system, and that does not
+# fit in the outputs of one artifact.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `monorepo-de-aplicaciones` 1.x.
+name: app-monorepo
+version: 2.0.0
+language: en
+replaces: [monorepo-de-aplicaciones]
+description:
+  en: >-
+    Two or three apps deployed separately in one repository, with a boundary: the one that keeps the main data owns it, and the others read it through its API.
+  es: >-
+    Dos o tres aplicaciones que se despliegan por separado en un mismo repositorio, con frontera: la que mantiene el dato principal es su dueña y las demás lo leen por su API.
+order: 3
+signals:
+  deployments: number
+  integrations: number
+  actors: number
+  consumers: text
+  volume: number
+# The name each signal had in the 1.x shape this one replaces: either name is accepted.
+formerSignals:
+  deployments: despliegues
+  integrations: integraciones
+  actors: actores
+  consumers: consumidores
+  volume: volumen
+applies:
+  - [deployments, '>=', 2]
+  - [deployments, '<=', 3]
+  - [integrations, '<=', 3]
+design:
+  - en: They are two apps deployed separately; the one that keeps the main data owns it.
+    es: Son dos aplicaciones que se despliegan por separado; la que mantiene el dato principal es su dueña.
+  - en: The owner of the data is the only one that writes it; the others (and any other system) only read it, and only through its API.
+    es: La dueña del dato es la única que lo escribe; las demás (y cualquier otro sistema) solo lo leen, y solo a través de su API.
+  - en: Each app that is not the owner must be changeable or replaceable without touching the owner.
+    es: Cada aplicación que no es dueña tiene que poder cambiarse o sustituirse sin tocar a la dueña.
+  - en: What each app stores on its own is its own, and is kept apart from the main data.
+    es: Lo que cada aplicación guarda por su cuenta es suyo y está separado del dato principal.
+  - en: The main data and what each app stores survive restarts; the starting data is loaded once from what is used today.
+    es: El dato principal y lo que guarda cada aplicación sobreviven a reinicios; los datos de partida se cargan una vez desde lo que se usa hoy.
+gaps:
+  - en: Which the apps are (what each kind of person or system uses), and whether each one must be changeable or replaceable without touching the other.
+    es: Cuáles son las aplicaciones (lo que usa cada tipo de persona o sistema) y si cada una tiene que poder cambiarse o sustituirse sin tocar la otra.
+  - en: Whose each piece of data is (who writes and corrects it) and who only reads it.
+    es: De quién es cada dato (quién lo escribe y lo corrige) y quién solo lo lee.
+  - en: Which other systems use any of the apps, and what they can and cannot do with them.
+    es: Qué otros sistemas usan alguna de las aplicaciones, qué pueden hacer con ellas y qué no.
+  - en: What each app stores on its own, besides the main data.
+    es: Qué guarda cada aplicación por su cuenta, además del dato principal.
+  - en: Where today's data comes from, how much there is, how it is moved into the system, and what has to survive a restart.
+    es: De dónde salen los datos de hoy, cuántos son, cómo se pasan al sistema y qué tiene que sobrevivir a un reinicio.
+  - en: When a change made in one app has to show up in the other.
+    es: Cuándo tiene que verse en una aplicación un cambio hecho en la otra.
+
+variants:
+  - name: simple
+    applies:
+      - [deployments, '<=', 2]
+      - [actors, '<=', 1]
+    roles: &roles
+      - name: implementer
+        purpose:
+          en: builds the system in the system step (the code, its tests and the outputs the evidence step requires)
+          es: construye el sistema en el paso de sistema (el código, sus pruebas y las salidas que exige el paso de evidencia)
+        text:
+          en: >-
+            ROLE: IMPLEMENTER (phase 2). You build what was agreed, nothing more: the requirements the unit brings and the technical ones in force, with the archetype's craft.
+            You descend each touched artifact level by level, and the code stays the way its stack asks for it; you do not bend it to fit.
+            Every functional requirement you build carries its end-to-end test, which starts the artifact through its startup contract and uses it the way a person would:
+            a test that calls from the inside a function the real path never uses proves nothing.
+            You copy the catalog fixtures as they are and never edit them. You run the tests, the floor and the whole e2e suite yourself, and you link each run
+            to its requirements with `satisfies`. You never weaken or delete a test to make it pass. If something that worked breaks, you fix it;
+            if you cannot, you report it with `action: ask` (`asks: defect`) and the person decides. You never hide it.
+          es: >-
+            PAPEL: IMPLEMENTADOR (fase 2). Construyes lo acordado, nada más: los requisitos que trae la unidad y los técnicos vigentes, con el oficio del arquetipo.
+            Desciendes cada artefacto tocado nivel a nivel y el código se queda como lo pide su stack; no lo deformas para encajar.
+            Cada funcional que construyes lleva su prueba de extremo a extremo, que arranca el artefacto por su contrato de arranque y lo usa como una persona:
+            una prueba que llama por dentro a una función que el camino real no usa no demuestra nada.
+            Copias las fijaciones del catálogo tal cual y no las editas. Corres tú las pruebas, el suelo y la suite e2e entera, y vinculas cada ejecución
+            a sus requisitos con `satisfies`. No rebajas ni borras una prueba para que pase. Si algo que funcionaba se rompe, lo arreglas;
+            si no puedes, lo reportas con `action: ask` (`asks: defect`) y decide la persona. Nunca lo escondes.
+      - name: reviewer
+        purpose:
+          en: checks in the evidence step that what was built works through the real path, before handing in the evidence
+          es: revisa en el paso de evidencia que lo construido funciona por el camino real, antes de entregar la evidencia
+        text:
+          en: >-
+            ROLE: REVIEWER (phase 2). You do not write the code: you review it the way the person would use it. You check that every functional requirement built has its e2e test,
+            that the test starts the artifact through its startup contract instead of calling it from the inside, and that it passes; that the catalog fixtures were not touched;
+            and you look at the tests changed or deleted since the snapshot (the step summary lists them): if any was weakened to make it pass, you say so.
+            You run the floor and the whole e2e suite with the exact composed command and hand in that evidence. You do not accept what fails:
+            it gets fixed, or it gets reported as a defect with `action: ask` and the person decides. If a functional requirement does not allow an automated test
+            (an email, something visual, an external integration), you request that with `action: ask` (`asks: no_e2e`), giving the reason.
+          es: >-
+            PAPEL: REVISOR (fase 2). No escribes el código: lo revisas como lo usaría la persona. Compruebas que cada funcional construido tiene su prueba e2e,
+            que arranca el artefacto por su contrato de arranque y no lo llama por dentro, y que pasa; que las fijaciones del catálogo no se tocaron;
+            y miras las pruebas modificadas o borradas desde la foto (las lista el resumen del paso): si alguna se rebajó para que pase, lo dices.
+            Corres el suelo y la suite e2e entera con el comando compuesto exacto y entregas esa evidencia. Lo que falla no lo das por bueno:
+            se arregla, o se reporta como defecto con `action: ask` y decide la persona. Si un funcional no admite una prueba automática
+            (un correo, algo visual, una integración externa), lo pides con `action: ask` (`asks: no_e2e`), con el motivo.
+    components:
+      - name: owner
+        description:
+          en: >-
+            The app that owns the main data, in three rungs: what is asked for, its pieces and the code. It is the only one that writes it, and it offers it through its API.
+          es: >-
+            La aplicación dueña del dato principal, en tres peldaños: lo que se pide, sus piezas y el código. Es la única que lo escribe, y lo ofrece por su API.
+        kinds:
+          - { name: goal, describes: { en: "a piece of the request (L0), with no location in the tree", es: "pieza de la solicitud (L0), sin ubicación en el árbol" }, located: false }
+          - { name: module, describes: { en: the package or module definition, es: la definición del paquete o del módulo }, located: true }
+          - { name: domain, describes: { en: "the entities of the main data and their rules, pure", es: "las entidades del dato principal y sus reglas, puras" }, located: true }
+          - { name: storage, describes: { en: saving and loading the main data, es: guardar y cargar el dato principal }, located: true }
+          - { name: service, describes: { en: "one use case per action, over the domain and the storage, with no HTTP", es: "un caso de uso por acción, sobre el dominio y el almacén, sin HTTP" }, located: true }
+          - { name: api, describes: { en: "the API the others read the data through; it only translates requests into services", es: "la API con que las demás leen el dato; solo traduce peticiones a servicios" }, located: true }
+          - { name: entrypoint, describes: { en: the entry point of the app, es: el punto de entrada de la aplicación }, located: true }
+          - { name: test, describes: { en: a test file, es: fichero de prueba }, located: true }
+        coRequirements:
+          - { when: service, requires: [test] }
+        levels: &simple-levels
+          - id: L0
+            requiredRoles: []
+            title: { en: REQUEST, es: SOLICITUD }
+            instruction:
+              en: Declare what this app has to do, for whom, and which data is its own.
+              es: Declara qué tiene que hacer esta aplicación, para quién, y qué datos son suyos.
+          - id: L1
+            requiredRoles: []
+            title: { en: PIECES, es: PIEZAS }
+            instruction:
+              en: Propose its pieces, with the boundary with the other app in plain sight.
+              es: Propón sus piezas, con la frontera con la otra aplicación a la vista.
+            fanout: { min: 3, max: 16 }
+          - id: L2
+            requiredRoles: []
+            title: { en: IMPLEMENTATION, es: IMPLEMENTACIÓN }
+            instruction:
+              en: Write the code; whatever talks to the other app does so only through its API.
+              es: Escribe el código; lo que habla con la otra aplicación lo hace solo por su API.
+            fanout: { min: 1, max: 60 }
+      - name: consumer
+        description:
+          en: >-
+            An app that reads the main data through the owner's API, in three rungs. It can be changed or replaced without touching the owner.
+          es: >-
+            Una aplicación que lee el dato principal por la API de la dueña, en tres peldaños. Se puede cambiar o sustituir sin tocar a la dueña.
+        kinds:
+          - { name: goal, describes: { en: "a piece of the request (L0), with no location in the tree", es: "pieza de la solicitud (L0), sin ubicación en el árbol" }, located: false }
+          - { name: module, describes: { en: the package or module definition, es: la definición del paquete o del módulo }, located: true }
+          - { name: client, describes: { en: "the only place that calls the owner's API", es: el único sitio que llama a la API de la dueña }, located: true }
+          - { name: domain, describes: { en: "what the app does with what it reads, pure", es: "lo que la aplicación hace con lo que lee, puro" }, located: true }
+          - { name: storage, describes: { en: "what it stores on its own, apart from the main data", es: "lo que guarda por su cuenta, separado del dato principal" }, located: true }
+          - { name: interface, describes: { en: what the person using it sees, es: lo que ve quien la usa }, located: true }
+          - { name: entrypoint, describes: { en: the entry point of the app, es: el punto de entrada de la aplicación }, located: true }
+          - { name: test, describes: { en: a test file, es: fichero de prueba }, located: true }
+        coRequirements:
+          - { when: client, requires: [test] }
+        levels: *simple-levels
+  - name: full
+    applies: []
+    roles: *roles
+    components:
+      - name: owner
+        description:
+          en: >-
+            The app that owns the main data, in five rungs: what is asked for, its pieces, its contracts, the wiring and the code.
+          es: >-
+            La aplicación dueña del dato principal, en cinco peldaños: lo que se pide, sus piezas, sus contratos, el cableado y el código.
+        kinds:
+          - { name: goal, describes: { en: "a piece of the request (L0), with no location in the tree", es: "pieza de la solicitud (L0), sin ubicación en el árbol" }, located: false }
+          - { name: module, describes: { en: the package or module definition, es: la definición del paquete o del módulo }, located: true }
+          - { name: domain, describes: { en: "the entities of the main data and their rules, pure", es: "las entidades del dato principal y sus reglas, puras" }, located: true }
+          - { name: storage, describes: { en: saving and loading the main data, es: guardar y cargar el dato principal }, located: true }
+          - { name: service, describes: { en: "one use case per action, over the domain and the storage, with no HTTP", es: "un caso de uso por acción, sobre el dominio y el almacén, sin HTTP" }, located: true }
+          - { name: api, describes: { en: "the API the others read the data through; it only translates requests into services", es: "la API con que las demás leen el dato; solo traduce peticiones a servicios" }, located: true }
+          - { name: entrypoint, describes: { en: the entry point of the app, es: el punto de entrada de la aplicación }, located: true }
+          - { name: test, describes: { en: a test file, es: fichero de prueba }, located: true }
+          - { name: dependency, describes: { en: "an edge of the wiring (L3) between two declared pieces", es: "arista del cableado (L3) entre dos piezas declaradas" }, located: false }
+        coRequirements:
+          - { when: service, requires: [test] }
+          - { when: storage, requires: [test] }
+        levels: &full-levels
+          - id: L0
+            requiredRoles: []
+            title: { en: REQUEST, es: SOLICITUD }
+            instruction:
+              en: Declare what this app has to do, for whom, and which data is its own.
+              es: Declara qué tiene que hacer esta aplicación, para quién, y qué datos son suyos.
+          - id: L1
+            requiredRoles: []
+            title: { en: PIECES, es: PIEZAS }
+            instruction:
+              en: Propose its pieces, with the boundary with the other app in plain sight.
+              es: Propón sus piezas, con la frontera con la otra aplicación a la vista.
+            fanout: { min: 3, max: 20 }
+          - id: L2
+            requiredRoles: []
+            title: { en: CONTRACTS, es: CONTRATOS }
+            instruction:
+              en: Declare each API operation (or each call to it) with what it receives, what it returns and its errors.
+              es: Declara cada operación de la API (o cada llamada a ella) con lo que recibe, lo que devuelve y sus errores.
+            fanout: { min: 1, max: 40 }
+          - id: L3
+            requiredRoles: []
+            title: { en: WIRING, es: CABLEADO }
+            instruction:
+              en: Declare what depends on what; nothing in one app imports the other.
+              es: Declara qué depende de qué; nada de una aplicación importa la otra.
+            fanout: { min: 1, max: 50 }
+          - id: L4
+            requiredRoles: []
+            title: { en: IMPLEMENTATION, es: IMPLEMENTACIÓN }
+            instruction:
+              en: Write the code; whatever talks to the other app does so only through its API.
+              es: Escribe el código; lo que habla con la otra aplicación lo hace solo por su API.
+            fanout: { min: 1, max: 90 }
+      - name: consumer
+        description:
+          en: >-
+            An app that reads the main data through the owner's API, in five rungs. It can be changed or replaced without touching the owner.
+          es: >-
+            Una aplicación que lee el dato principal por la API de la dueña, en cinco peldaños. Se puede cambiar o sustituir sin tocar a la dueña.
+        kinds:
+          - { name: goal, describes: { en: "a piece of the request (L0), with no location in the tree", es: "pieza de la solicitud (L0), sin ubicación en el árbol" }, located: false }
+          - { name: module, describes: { en: the package or module definition, es: la definición del paquete o del módulo }, located: true }
+          - { name: client, describes: { en: "the only place that calls the owner's API", es: el único sitio que llama a la API de la dueña }, located: true }
+          - { name: domain, describes: { en: "what the app does with what it reads, pure", es: "lo que la aplicación hace con lo que lee, puro" }, located: true }
+          - { name: storage, describes: { en: "what it stores on its own, apart from the main data", es: "lo que guarda por su cuenta, separado del dato principal" }, located: true }
+          - { name: interface, describes: { en: what the person using it sees, es: lo que ve quien la usa }, located: true }
+          - { name: entrypoint, describes: { en: the entry point of the app, es: el punto de entrada de la aplicación }, located: true }
+          - { name: test, describes: { en: a test file, es: fichero de prueba }, located: true }
+          - { name: dependency, describes: { en: "an edge of the wiring (L3) between two declared pieces", es: "arista del cableado (L3) entre dos piezas declaradas" }, located: false }
+        coRequirements:
+          - { when: client, requires: [test] }
+        levels: *full-levels
+
+tiers:
+  - name: multiple-actors
+    when:
+      - [actors, '>=', 2]
+    design:
+      - en: Each actor has its own way in; maintaining the data is done on the owner app's side, and the app the public uses never writes to it.
+        es: Cada actor tiene su vía; mantener el dato se hace del lado de la aplicación dueña, y la que usa el público nunca escribe en él.
+    gaps:
+      - en: Who maintains the main data, and from where.
+        es: Quién mantiene el dato principal y desde dónde.
+    craft:
+      - en: Maintaining the main data is done on the owner's side; the consumer never writes to it.
+        es: Mantener el dato principal se hace del lado de la dueña; la consumidora nunca escribe en él.
+  - name: consumed-by-systems
+    when:
+      - [consumers, 'in', [systems, both]]
+    design:
+      - en: The API of the owner app is a stable contract for other systems.
+        es: La API de la aplicación dueña es un contrato estable para otros sistemas.
+    gaps:
+      - en: Which other systems use the API, what they can do with it, and how they learn about a change.
+        es: Qué otros sistemas usan la API, qué pueden hacer con ella y cómo se enteran de un cambio.
+    craft:
+      - en: The API is a contract - stable responses, errors with a code and a message, and each route described with an example.
+        es: La API es un contrato - respuestas estables, errores con código y mensaje, y cada ruta descrita con un ejemplo.
+    coRequirements:
+      - { when: api, requires: [test], components: [owner] }
+  - name: high-volume
+    when:
+      - [volume, '>=', 1000]
+    craft:
+      - en: With thousands of records, nothing walks through or downloads the whole data set on every request; listings are paginated.
+        es: Con miles de registros nada recorre ni descarga el dato entero en cada petición; los listados se paginan.
+  - name: integrations
+    when:
+      - [integrations, '>=', 1]
+    design:
+      - en: Each outside system is used through a single place, which can be replaced by a double for testing.
+        es: Cada sistema ajeno se usa a través de un solo sitio, que se puede sustituir por un doble para probar.
+    craft:
+      - en: Each call to another system has a double for testing without the real system, which covers failure and delay.
+        es: Cada llamada a otro sistema tiene un doble para probar sin el sistema real, que cubre el fallo y la demora.
+    coRequirements:
+      - { when: service, requires: [test] }

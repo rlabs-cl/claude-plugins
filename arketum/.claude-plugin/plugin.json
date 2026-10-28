@@ -1,7 +1,10 @@
 {
   "name": "arketum",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Arketum: a verified lifecycle for building software with an agent (work units, gates decided by you, requirements with evidence, and a local status panel).",
-  "author": { "name": "rlabs" },
-  "license": "SEE LICENSE IN LICENSE"
+  "author": { "name": "rlabs", "url": "https://rlabs.cl" },
+  "homepage": "https://rlabs.cl/productos/arketum",
+  "repository": "https://github.com/rlabs-cl/claude-plugins",
+  "license": "SEE LICENSE IN LICENSE",
+  "keywords": ["software-lifecycle", "requirements", "verification", "coding-agents", "mcp", "gates", "evidence"]
 }

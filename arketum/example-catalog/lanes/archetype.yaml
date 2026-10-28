@@ -1,0 +1,22 @@
+# A new archetype: it is written and published in the catalog the person chooses.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `arquetipo` 1.x.
+name: archetype
+version: 2.0.0
+language: en
+replaces: [arquetipo]
+when:
+  en: No archetype in the catalogs describes a kind of artifact that is going to be built.
+  es: Ningún arquetipo de los catálogos describe un tipo de artefacto que se va a construir.
+milestones: [delivery]
+steps:
+  - { id: archetype, kind: artifact, archetype: { name: archetype-author }, gate: true }
+  - id: milestone
+    kind: milestone
+    gate: true
+    requires:
+      - id: published
+        describes:
+          en: the person confirms the archetype is published in the catalog they chose
+          es: la persona confirma que el arquetipo está publicado en el catálogo que eligió
+        classes: [statement]

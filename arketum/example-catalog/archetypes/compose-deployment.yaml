@@ -1,0 +1,160 @@
+# Deployment with Docker Compose.
+#
+# Artifact of the single-layer system: the deployment definition, the
+# configuration of each environment (an example, never the real one), its
+# documentation and, if wanted, a smoke test (`smoke.sh`, a suggested location,
+# not a required one). Its root is `deploy/`, so it does not overlap with a
+# root `.`: the compose file is invoked as `docker compose -f deploy/compose.yaml`.
+# The other modes (pipeline, script…) are published through the `archetype` step.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `despliegue-compose` 1.x.
+name: compose-deployment
+version: 2.0.0
+language: en
+replaces: [despliegue-compose]
+description:
+  en: >-
+    Deploying a system with Docker Compose: the definition (`compose.yaml`), the example configuration of each environment (`<env>.env.example`, never `.env`), its documentation (`DEPLOY.md`) and, if wanted, a smoke test (`smoke.sh`), in the root `deploy/`. Choose it when the infrastructure survey agrees on the mode `compose`.
+  es: >-
+    Despliegue de un sistema con Docker Compose: la definición (`compose.yaml`), la configuración de ejemplo de cada entorno (`<env>.env.example`, nunca `.env`), su documentación (`DEPLOY.md`) y, si se quiere, una prueba de humo (`smoke.sh`), en la raíz `deploy/`. Elígelo cuando el levantamiento de infraestructura acuerde el modo `compose`.
+tags:
+  - { en: deployment, es: despliegue }
+  - { en: infrastructure, es: infraestructura }
+  - { en: compose, es: compose }
+# It governs a deployment artifact: the `deploy` lane requires one like this among the touched artifacts. An archetype
+# of another mode (pipeline, script…) declares it the same way.
+deployment: true
+
+kinds:
+  - name: goal
+    describes:
+      en: "piece of the request (L0): what is deployed and in which environment, from the technical requirements of the survey"
+      es: "pieza de la solicitud (L0): lo que se despliega y en qué entorno, de los técnicos del levantamiento"
+  - name: definition
+    describes:
+      en: the deployment definition (`compose.yaml`, or `compose.<env>.yaml` if an environment changes it)
+      es: la definición del despliegue (`compose.yaml`, o `compose.<env>.yaml` si un entorno la cambia)
+  - name: environment
+    describes:
+      en: "the example configuration of an environment (`<env>.env.example`): variables with placeholders, never secret values"
+      es: "la configuración de ejemplo de un entorno (`<env>.env.example`): variables con marcadores, nunca valores secretos"
+  - name: verification
+    describes:
+      en: "optional: the smoke test (`smoke.sh`), which checks against what is deployed that it works, without printing secrets"
+      es: "opcional: la prueba de humo (`smoke.sh`), que comprueba contra lo desplegado que funciona, sin imprimir secretos"
+  - name: documentation
+    describes:
+      en: how each environment is deployed, verified and rolled back (`DEPLOY.md`)
+      es: cómo se despliega, se verifica y se revierte cada entorno (`DEPLOY.md`)
+
+extractors:
+  - mechanism: path
+    kind: definition
+    pattern: "compose.yaml"
+    alternatives: ["compose.<env>.yaml"]
+  - mechanism: path
+    kind: environment
+    pattern: "<env>.env.example"
+  - mechanism: path
+    kind: verification
+    pattern: "smoke.sh"
+  - mechanism: path
+    kind: documentation
+    pattern: "DEPLOY.md"
+
+# A definition without documentation cannot be operated by anyone else. The smoke
+# test is not required: whether it ran is confirmed by the person at the milestone.
+coRequirements:
+  - when: definition
+    requires: [documentation]
+    scope: artifact
+
+conventions:
+  oficio.1:
+    en: >-
+      Secrets do not go in the repository: a `.env` inside `deploy/` stays unclaimed and does not close the unit.
+      Take it out of the repository, declare its reference instead (`<scheme>:<path>`) in the infrastructure
+      survey and leave the variable with a placeholder in `<env>.env.example` (`DB_PASSWORD=<from vault:kv/app/db>`).
+    es: >-
+      Los secretos no van en el repositorio: un `.env` dentro de `deploy/` queda sin reclamar y no cierra la unidad.
+      Sácalo del repositorio, declara en su lugar su referencia (`<scheme>:<path>`) en el levantamiento de
+      infraestructura y deja en `<env>.env.example` la variable con un marcador (`DB_PASSWORD=<from vault:kv/app/db>`).
+  oficio.2:
+    en: >-
+      The dry-run validation is `docker compose -f deploy/compose.yaml config --quiet`, from the project root;
+      the `ready` step requires it as an `on: change` execution with exit code 0. It does not need the Docker daemon
+      (it only reads and validates the definition): it really runs even when nothing can be brought up.
+    es: >-
+      La validación en seco es `docker compose -f deploy/compose.yaml config --quiet`, desde la raíz del proyecto;
+      la exige el paso `ready` como una ejecución `on: change` con código 0. No necesita el daemon de Docker (solo
+      lee y valida la definición): se ejecuta de verdad aunque no se pueda levantar nada.
+  oficio.3:
+    en: >-
+      `smoke.sh`, if there is one, checks what is deployed along the real path (an HTTP request, a command of the
+      program) and exits with 0 if it works; it takes the environment as an argument and prints no secret. It is a
+      help, not a requirement: the `deployment <env>` milestone is met by the person confirming that it was deployed
+      and ran; its `on: environment` execution (or the CI report) is handed in as backing and shows up in the question.
+    es: >-
+      `smoke.sh`, si lo hay, comprueba lo desplegado por el camino real (una petición HTTP, una orden del programa) y
+      termina con 0 si funciona; recibe el entorno como argumento y no imprime ningún secreto. Es una ayuda, no una
+      exigencia: el hito `deployment <env>` lo cumple la persona al confirmar que se desplegó y corrió; su ejecución
+      `on: environment` (o el reporte del CI) se entrega como respaldo y sale en la pregunta.
+  oficio.4:
+    en: >-
+      `DEPLOY.md` says, per environment, how it is deployed, how to check that it ran (with `smoke.sh` if there is
+      one), how it is rolled back and where the variables of each `<env>.env.example` come from.
+    es: >-
+      `DEPLOY.md` dice, por entorno, cómo se despliega, cómo se comprueba que corrió (con `smoke.sh` si lo hay), cómo
+      se revierte y de dónde salen las variables de cada `<env>.env.example`.
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: { en: GOAL, es: OBJETIVO }
+    instruction:
+      en: >
+        Declare what is deployed and in which environments, following the
+        technical requirements of the infrastructure survey (the input): the
+        mode, each environment and what was agreed for each one.
+      es: >
+        Declara qué se despliega y en qué entornos, atendiendo a los técnicos del
+        levantamiento de infraestructura (la entrada): el modo, cada entorno y lo
+        acordado de cada uno.
+  - id: L1
+    requiredRoles: []
+    title: { en: PIECES, es: PIEZAS }
+    instruction:
+      en: >
+        Propose the pieces: the definition, the example configuration of each
+        environment (never the real one: secrets go by their reference), the
+        documentation and, if it helps, the smoke test. A `.env` is not a piece:
+        it stays out of the repository.
+      es: >
+        Propón las piezas: la definición, la configuración de ejemplo de cada
+        entorno (nunca la real: los secretos van por su referencia), la
+        documentación y, si ayuda, la prueba de humo. Un `.env` no es una pieza:
+        queda fuera del repositorio.
+    fanout:
+      min: 3
+      max: 20
+  - id: L2
+    requiredRoles: []
+    title: { en: FILES, es: FICHEROS }
+    instruction:
+      en: >
+        Declare each file with its `location`, relative to `deploy/`:
+        `compose.yaml`, `<env>.env.example`, `DEPLOY.md` and, if there is one,
+        `smoke.sh`. If there is a `.env` inside `deploy/`, take it out of the
+        repository and declare its reference in the infrastructure survey:
+        nothing claims it here, and a unit with an unclaimed file does not
+        close.
+      es: >
+        Declara cada fichero con su `location`, relativa a `deploy/`:
+        `compose.yaml`, `<env>.env.example`, `DEPLOY.md` y, si lo hay,
+        `smoke.sh`. Si dentro de `deploy/` hay un `.env`, sácalo del
+        repositorio y declara su referencia en el levantamiento de
+        infraestructura: aquí no lo reclama nadie, y una unidad con un fichero
+        sin reclamar no cierra.
+    fanout:
+      min: 3
+      max: 30

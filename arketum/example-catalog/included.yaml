@@ -1,0 +1,8 @@
+# The marker of the catalog Arketum ships (ds-f06): Arketum recognises it by itself, whatever the name of the
+# package it is installed in. It is not policy: the catalog reader does not read it as an element.
+#
+# `predecessors`: the frozen catalogs that only resolve what was stored with them (cb-t02). `v1/` is the 1.x example
+# catalog, byte for byte: every lane, archetype, shape and stack pinned by version in a project keeps resolving to
+# the same element with the same fingerprint, and it is never offered for new work.
+name: example
+predecessors: [v1]

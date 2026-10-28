@@ -1,0 +1,71 @@
+# Functional inventory of an existing system.
+#
+# Before migrating, what the system does today: the functions that cannot be
+# lost. It is the starting line of the migration plan.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `inventario-funcional` 1.x.
+name: functional-inventory
+version: 2.0.0
+language: en
+replaces: [inventario-funcional]
+description:
+  en: >-
+    What an existing system does today, function by function, before migrating it: what cannot be lost. It is the first working artifact of the migration lane. Choose it to describe a system that already exists; to ask for something new, a PRD is the right one.
+  es: >-
+    Qué hace hoy un sistema existente, función a función, antes de migrarlo: lo que no se puede perder. Es el primer artefacto de trabajo del carril de migración. Elígelo para describir un sistema que ya existe; para pedir algo nuevo corresponde un PRD.
+tags:
+  - { en: process, es: proceso }
+  - { en: migration, es: migración }
+  - { en: inventory, es: inventario }
+
+kinds:
+  - name: goal
+    describes:
+      en: "piece of the request (L0): which system is inventoried and for which migration"
+      es: "pieza de la solicitud (L0): qué sistema se inventaría y para qué migración"
+  - name: function
+    describes:
+      en: something the system does today and someone uses
+      es: algo que el sistema hace hoy y que alguien usa
+  - name: document
+    describes:
+      en: the inventory file, in the working folder of the step
+      es: el fichero del inventario, en la carpeta de trabajo del paso
+
+extractors:
+  - mechanism: path
+    kind: document
+    pattern: "<name>.md"
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: { en: SYSTEM, es: SISTEMA }
+    instruction:
+      en: >
+        Declare which system is inventoried, where it lives and what it is
+        migrated to.
+      es: >
+        Declara qué sistema se inventaría, dónde vive y hacia dónde se migra.
+  - id: L1
+    requiredRoles: []
+    title: { en: FUNCTIONS, es: FUNCIONES }
+    instruction:
+      en: >
+        Declare the functions of the current system, each one with who uses it,
+        and the inventory file (kind `document`, with its `location`). A function
+        nobody uses is declared all the same: deciding whether it is lost belongs
+        to the plan. A function can seed the requirements index of the system
+        with the same attributes as a requirement in the PRD (`type`,
+        `requirement`, `title`, `comesFrom` and the rest): approving the
+        inventory agrees on them.
+      es: >
+        Declara las funciones del sistema actual, cada una con quién la usa, y el
+        fichero del inventario (tipo `document`, con su `location`). Una función
+        que nadie usa se declara igual: decidir si se pierde es del plan. Una
+        función puede sembrar el índice de requisitos del sistema con los mismos
+        atributos que un requisito del PRD (`type`, `requirement`, `title`,
+        `comesFrom` y los demás): aprobar el inventario los acuerda.
+    fanout:
+      min: 1
+      max: 80

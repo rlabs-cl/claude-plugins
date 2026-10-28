@@ -1,5 +1,5 @@
 {
-  "$comentario": "El destino de la telemetría (tl-t03): adónde va el resumen anónimo de uso, con qué clave, con qué nombre de evento y con qué forma de sobre, y las marcas de cada canal de instalación (tl-t06). src/ no lo nombra: el empaquetado copia este fichero junto al código del paquete npm y del plugin, y el código lo lee de ahí. La clave del proyecto que recibe es pública y solo sirve para escribir; vacía, no se envía nada. Cambiar de destino, o autoalojarlo, es cambiar este fichero.",
+  "$comentario": "The telemetry destination (tl-t03): where the anonymous usage summary goes, with which key, which event name and which envelope shape, the marks of each installation channel (tl-t06), and, under version, where the new-version notice asks for the latest published version and how each channel updates (v110). src/ does not name it: packaging copies this file next to the code of the npm package and the plugin, and the code reads it from there. The receiving project's key is public and can only write; empty, nothing is sent. Changing the destination, or self-hosting it, means changing this file.",
   "url": "https://eu.i.posthog.com/i/v0/e/",
   "clave": "phc_snA2a4zN5Qku7qrZp6JQ2QdrYRX8phZvJa6AptDyiRwr",
   "evento": "arketum_resumen",
@@ -15,7 +15,7 @@
     "$geoip_disable": true
   },
   "garantias": {
-    "$comentario": "Lo que garantiza cada propiedad fija, con el valor que la cumple: que el destino no cree un perfil de persona y que no derive la ubicación de la conexión. Las pruebas comprueban estas garantías por su nombre, sin nombrar las propiedades del proveedor.",
+    "$comentario": "What each fixed property guarantees, with the value that fulfills it: that the destination does not create a person profile and does not derive the location from the connection. The tests check these guarantees by their name, without naming the provider's properties.",
     "sin_perfil": ["$process_person_profile", false],
     "sin_ubicacion": ["$geoip_disable", true]
   },
@@ -23,5 +23,14 @@
     "plugin": { "variable": "plugin" },
     "npx": { "ruta": ["_npx"] },
     "npm-global": { "ruta": ["lib/node_modules", "npm/node_modules"] }
+  },
+  "version": {
+    "$comentario": "The new-version notice (v110): at most once a day per address, a plain GET to the ultima of this installation's channel (a JSON answer with version: the package registry, or the plugin manifest in the public marketplace repository, which is published separately and can lag behind); if that version is newer than the running one, the agent is told once per session how to update that channel. Without a recognized channel, porDefecto's address is used and every channel that shares it is listed. Without actualizar, restarting the client is enough (a bare package name already starts the newest), and fijar, or clearing cache.carpeta inside the folder that cache.orden prints, are the way out if an old package runner keeps the old one. {paquete} is the package name from its manifest. Nothing else is sent, and ARKETUM_TELEMETRIA=0 turns it off. src/ does not name any of this: it reads it from here.",
+    "porDefecto": "npm-global",
+    "canales": {
+      "npm-global": { "ultima": "https://registry.npmjs.org/{paquete}/latest", "actualizar": ["npm install -g {paquete}@latest"] },
+      "npx": { "ultima": "https://registry.npmjs.org/{paquete}/latest", "fijar": "{paquete}@latest", "cache": { "orden": "npm config get cache", "carpeta": "_npx" } },
+      "plugin": { "ultima": "https://raw.githubusercontent.com/rlabs-cl/claude-plugins/main/arketum/.claude-plugin/plugin.json", "actualizar": ["/plugin marketplace update rlabs", "/plugin update arketum@rlabs"] }
+    }
   }
 }

@@ -1,14 +1,15 @@
 ---
 name: arketum
-description: Cómo trabajar en un proyecto gobernado por Arketum (con carpeta .arketum/) o empezar uno nuevo con Arketum. Úsala al comenzar a trabajar en un proyecto así, al abrir o retomar unidades de trabajo, o cuando la persona pida su estado, sus pendientes o el panel.
+description: How to work in a project governed by Arketum (with an .arketum/ folder) or start a new one with Arketum. Use it when starting work in such a project, when opening or resuming work units, or when the person asks for its overview, their pending items or the panel.
 ---
 
-# Trabajar con Arketum
+# Working with Arketum
 
-Arketum gobierna el proyecto a través de una sola herramienta MCP, `build` (servidor `arketum` de este plugin). Lo que hay que hacer en cada momento lo dice la propia herramienta: cada respuesta termina con una **guía** y su **acción siguiente** va primero. Síguela.
+Arketum governs the project through a single MCP tool, `build` (the `arketum` server of this plugin). What to do at each moment is said by the tool itself: every answer ends with a **guide** and its **next action** comes first. Follow it.
 
-- **Al comenzar.** Llama a `build` con `root` (la carpeta del proyecto, ruta absoluta) y sin `action`: trae el estado del proyecto (o el arranque, si aún no tiene `.arketum/`). Dale a la persona la dirección del panel: si el inicio de sesión ya la puso en tu contexto, esa; si no, pídela con `action: panel`.
-- **El trabajo va en unidades** (`action: open`, con carril, objetivo y artefactos que toca); cada paso se entrega con `action: submit`.
-- **Los gates los decide la persona.** Si tu cliente no le muestra el formulario, preséntale el resumen tal cual, pregúntale en el chat y transmite lo que dijo con `action: decide`. Nunca decidas tú. También puede decidir en el panel o en `.arketum/decisiones-pendientes.md` (`action: tanda`).
-- **No edites `.arketum/` a mano**: lo escribe Arketum. Tú escribes el código del proyecto y los documentos de trabajo que te pide cada paso.
-- **Arketum no ejecuta nada**: las pruebas y los comandos los corres tú y entregas su evidencia.
+- **When starting.** Call `build` with `root` (the project's folder, absolute path) and no `action`: it brings the project's overview (or the bootstrap, if it has no `.arketum/` yet). Give the person the panel's address: if the session start already put it in your context, that one; if not, ask for it with `action: panel`.
+- **Work goes in units** (`action: open`, with lane, objective and the artifacts it touches); each step is submitted with `action: submit`.
+- **The person decides the gates.** If your client does not show them the form, present the summary as is, ask them in the chat and relay what they said with `action: decide`. Never decide yourself. They can also decide in the panel or in `.arketum/pending-decisions.md` (`action: batch`; `decisiones-pendientes.md` in a store from an earlier format).
+- **Do not edit `.arketum/` by hand**: Arketum writes it. You write the project's code and the working documents each step asks for.
+- **Arketum runs nothing**: you run the tests and the commands and submit their evidence.
+- **Each project speaks its own language** (Spanish or English): what Arketum writes for a project comes out in that project's language; tool names are the same in both.

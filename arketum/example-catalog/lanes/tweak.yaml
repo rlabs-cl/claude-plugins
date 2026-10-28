@@ -1,0 +1,19 @@
+# A tweak: a small change on pieces that already exist. It is thought through change by change (the literal quote of
+# the request and a short radius) and tested as a group: it closes without conditions 9 and 10, which a `check` of the
+# unchecked tweaks judges. Arketum measures its size against the baseline: if it exceeds it, it is discarded and goes
+# on in `feature` (`continues`), with its snapshot.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `ajuste` 1.x.
+name: tweak
+version: 2.0.0
+language: en
+replaces: [ajuste]
+when:
+  en: A small change on pieces that already exist. If it turns out bigger, Arketum says so and moves it up to `feature`.
+  es: Un cambio chico sobre piezas que ya existen. Si resulta más grande, Arketum lo dice y sube a `feature`.
+checking: grouped
+maxUnchecked: 5
+maxUncheckedChanges: 16
+steps:
+  - { id: tweak, kind: artifact, archetype: { name: tweak }, gate: true, elicitation: brief, maxRequirements: 3, feeds: [system] }
+  - { id: system, kind: system, fedBy: [tweak], maxChanges: 8, pieces: L1 }

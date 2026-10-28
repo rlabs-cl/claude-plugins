@@ -1,0 +1,206 @@
+# Academic paper. LaTeX.
+#
+# Declares the shape of a document that supports claims (a thesis, an article,
+# a research report), not the content of any of them. It does not know what
+# it is about.
+#
+# This archetype also exists to test something: if the ladder only worked for
+# code, it would break here.
+#
+# 2.0.0: the example catalog in English, bilingual; it replaces `documento-academico` 1.x.
+name: academic-paper
+version: 2.0.0
+language: en
+replaces: [documento-academico]
+description:
+  en: >-
+    A document that supports claims with sources (thesis, article, research report), in LaTeX. It descends from the question to the structure, the claims and their dependencies, down to the manuscript. Choose it when the artifact is prose that has to be defensible, not documentation of a system.
+  es: >-
+    Documento que sostiene afirmaciones con fuentes (tesis, artículo, informe de investigación), en LaTeX. Desciende de la pregunta a la estructura, las afirmaciones y sus dependencias, hasta el manuscrito. Elígelo cuando el artefacto sea prosa que tiene que poder defenderse, no documentación de un sistema.
+tags:
+  - { en: document, es: documento }
+  - { en: research, es: investigación }
+  - { en: latex, es: latex }
+
+kinds:
+  - name: goal
+    describes:
+      en: "piece of the request (L0): what is to be shown"
+      es: "pieza de la solicitud (L0): qué se quiere demostrar"
+  - name: chapter
+    describes:
+      en: major section with a thesis of its own
+      es: sección mayor con una tesis propia
+  - name: claim
+    describes:
+      en: what a chapter supports and what could be false
+      es: lo que un capítulo sostiene y que puede ser falso
+  - name: figure
+    describes:
+      en: image, diagram or chart
+      es: imagen, diagrama o gráfico
+  - name: caption
+    describes:
+      en: text that explains a figure and makes it citable
+      es: texto que explica una figura y la hace citable
+  - name: reference
+    describes:
+      en: bibliography entry
+      es: entrada bibliográfica
+  - name: datum
+    describes:
+      en: data file that backs a claim
+      es: fichero de datos que respalda una afirmación
+  - name: dependency
+    describes:
+      en: wiring edge (L3) between two declared pieces
+      es: arista del cableado (L3) entre dos piezas declaradas
+  - name: document
+    describes:
+      en: policy or notes file
+      es: fichero de política o de notas
+
+extractors:
+  - mechanism: path
+    kind: chapter
+    pattern: "chapters/<name>.tex"
+  - mechanism: path
+    kind: figure
+    pattern: "figures/<name>.pdf"
+  - mechanism: path
+    kind: caption
+    pattern: "figures/<name>.tex"
+  - mechanism: path
+    kind: reference
+    pattern: "bibliography/<name>.bib"
+  - mechanism: path
+    kind: datum
+    pattern: "data/<name>.csv"
+
+# A figure without a caption cannot be cited or understood outside its page. It
+# is the same co-requirement as «an implementation needs a test», in another domain.
+coRequirements:
+  - when: figure
+    requires: [caption]
+    scope: artifact
+
+levels:
+  - id: L0
+    requiredRoles: []
+    title: { en: QUESTION, es: PREGUNTA }
+    instruction:
+      en: >
+        Declare what is to be shown and to whom. A question that cannot be
+        answered «no» is not a research question.
+      es: >
+        Declara qué se quiere demostrar y ante quién. Una pregunta que no puede
+        responderse «no» no es una pregunta de investigación.
+  - id: L1
+    requiredRoles: [introduction, development, conclusion]
+    title: { en: STRUCTURE, es: ESTRUCTURA }
+    instruction:
+      en: >
+        Propose the chapter structure and what each chapter covers. Every
+        document that supports something poses, develops and concludes; if your
+        structure does not tell those three functions apart, it is not
+        structured.
+      es: >
+        Propón la estructura de capítulos y qué cubre cada uno. Todo documento que
+        sostiene algo plantea, desarrolla y concluye; si tu estructura no distingue
+        esas tres funciones, no está estructurada.
+    fanout:
+      min: 3
+      max: 15
+  - id: L2
+    requiredRoles: []
+    title: { en: CLAIMS, es: AFIRMACIONES }
+    instruction:
+      en: >
+        Declare what each chapter claims and with which evidence it supports it.
+        A claim that no evidence could refute is not a claim: say so if that is
+        the case, instead of disguising it.
+      es: >
+        Declara qué afirma cada capítulo y con qué evidencia lo sostiene. Una
+        afirmación que ninguna evidencia puede desmentir no es una afirmación:
+        decláralo si es el caso, en vez de disfrazarla.
+    fanout:
+      min: 1
+      max: 40
+  - id: L3
+    requiredRoles: []
+    title: { en: DEPENDENCIES, es: DEPENDENCIAS }
+    instruction:
+      en: >
+        Declare which claim rests on which. If a chain of support loops back on
+        itself, the document reasons in a circle, and this level is where that
+        shows.
+      es: >
+        Declara qué afirmación se apoya en cuál. Si una cadena de apoyos vuelve
+        sobre sí misma, el documento razona en círculo y este nivel es donde se ve.
+    fanout:
+      min: 1
+      max: 50
+  - id: L4
+    requiredRoles: []
+    title: { en: MANUSCRIPT, es: MANUSCRITO }
+    instruction:
+      en: >
+        Write the text. Every figure comes with its caption and every claim with
+        the reference or the datum that supports it.
+      es: >
+        Escribe el texto. Cada figura viene con su pie y cada afirmación con la
+        referencia o el dato que la sostiene.
+    fanout:
+      min: 1
+      max: 60
+
+# The self-review: what whoever delivers has to check, and with which action.
+#
+# The ladder checks the jumps BETWEEN levels. Nobody checks that the manuscript
+# answers the question declared in L0, because there is no earlier rung to
+# reconcile it against. That is what this section closes.
+selfReview:
+  criteria:
+    - check:
+        en: Every citation has a source that can be located, and the source says what is attributed to it
+        es: Toda cita tiene fuente localizable y la fuente dice lo que se le atribuye
+      how:
+        en: >
+          Go through the citations one by one, open the source and compare the
+          claim with the passage. A source that could not be opened counts as
+          not checked.
+        es: >
+          Recorre las citas una a una, abre la fuente y contrasta la afirmación con
+          el pasaje. Una fuente que no se pudo abrir cuenta como no comprobada.
+      evidence: measured
+    - check:
+        en: The reference format is the declared one and is uniform across the whole document
+        es: El formato de referencias es el declarado y es uniforme en todo el documento
+      how:
+        en: Compare every entry against the style declared in L1.
+        es: Compara todas las entradas contra el estilo declarado en L1.
+      evidence: measured
+    - check:
+        en: No claims contradict each other across sections
+        es: No hay afirmaciones que se contradigan entre secciones
+      how:
+        en: >
+          Compare each claim in L2 with the others, in particular those in
+          different sections that talk about the same object.
+        es: >
+          Contrasta cada afirmación de L2 con las demás, en particular las de
+          secciones distintas que hablen del mismo objeto.
+      evidence: judgment
+    - check:
+        en: The delivered structure is the one declared in L1
+        es: La estructura entregada es la que se declaró en L1
+      evidence: judgment
+    - check:
+        en: The manuscript answers the question declared in L0, and not another one
+        es: El manuscrito responde la pregunta declarada en L0, y no otra
+      evidence: judgment
+  groundingCheck: true
+  groundingScope:
+    en: any source, citation, datum or claim
+    es: alguna fuente, cita, dato o afirmación
+  assumptionsMustDeclare: true
